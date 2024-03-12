@@ -1,0 +1,16 @@
+{
+    "name": "Aikom.AIEngine.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:b54594359ee42054aa22b0682bfaae06"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
