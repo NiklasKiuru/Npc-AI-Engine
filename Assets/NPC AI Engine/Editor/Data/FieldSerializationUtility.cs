@@ -1,19 +1,16 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Reflection;
 using System;
-using Codice.CM.SEIDInfo;
 using UnityEditor.UIElements;
 using UnityEditor;
-using System.Xml.Linq;
 
 namespace Aikom.AIEngine.Editor
 {
     public class FieldSerializationUtility
     {
-        public static VisualElement[] GetPropertyElements(NodeBase node)
+        public static VisualElement[] GetPropertyElements(NodeBase node, TreeAsset asset)
         {
             FieldInfo[] infoArray = node.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public);
             var validFields = new List<ExposedVariableInfo>();
@@ -31,12 +28,12 @@ namespace Aikom.AIEngine.Editor
             for(int i = 0; i < elements.Length; i++)
             {
                 var attr = validFields[i];
-                elements[i] = GenerateElement(attr, node);
+                elements[i] = GenerateElement(attr, node, asset);
             }
             return elements;
         }
 
-        private static VisualElement GenerateElement(ExposedVariableInfo info, NodeBase node)
+        private static VisualElement GenerateElement(ExposedVariableInfo info, NodeBase node, TreeAsset asset)
         {
             VisualElement returnVal = null;
             Type fieldType = info.Field.FieldType;
@@ -114,6 +111,39 @@ namespace Aikom.AIEngine.Editor
             {
                 returnVal = new Vector2Field(info.Attribute.Name) { value = (Vector2)info.Field.GetValue(node) };
                 returnVal.RegisterCallback<ChangeEvent<Vector2>>((evt) => { info.Field.SetValue(node, evt.newValue); });
+            }
+
+            if(fieldType == typeof(CacheVariable))
+            {   
+                var cacheAttr = info.Field.GetCustomAttribute<CacheVariableAttribute>();
+                var val = (CacheVariable)info.Field.GetValue(node);
+                if (val == null)
+                    val = new CacheVariable();
+                bool lockSelector = false;
+                if (cacheAttr != null && cacheAttr.RestrictSelection)
+                {
+                    val.space = cacheAttr.Space;
+                    lockSelector = true;
+                }
+                    
+                var list = new List<string>();
+                foreach(var option in asset.LocalVariables)
+                {
+                    if(string.IsNullOrEmpty(option)) 
+                        continue;
+                    list.Add(option);
+                }
+
+                var textField = new DropdownField(info.Attribute.Name, list, 0);
+                textField.RegisterValueChangedCallback((evt) => val.name = evt.newValue);
+                var enumField = new EnumField() { value = val.space };
+                if(!lockSelector)
+                    enumField.RegisterValueChangedCallback((evt) => { val.space = (CacheSpace)evt.newValue; });
+                else
+                    enumField.SetEnabled(false);
+                textField.Add(enumField);
+                info.Field.SetValue(node, val);
+                returnVal = textField;
             }
 
             if (returnVal == null)

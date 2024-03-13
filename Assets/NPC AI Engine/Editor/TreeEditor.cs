@@ -50,7 +50,6 @@ namespace Aikom.AIEngine.Editor
             rootVisualElement.Add(toolBar);
 
             var localVariableToggle = new ToolbarToggle() { label = "Local Variables" };            
-            var globalVariableToggle = new ToolbarToggle() { label = "Global Variables" };
             _localVariables = new Blackboard(_graph) 
             { 
                 title = "Local variables",
@@ -73,7 +72,6 @@ namespace Aikom.AIEngine.Editor
 
             _graph.Add(_localVariables);
             toolBar.Add(localVariableToggle);
-            toolBar.Add(globalVariableToggle);
             toolBar.Add(assetField);
             localVariableToggle.RegisterValueChangedCallback(ShowLocalVariables);
 
@@ -192,6 +190,7 @@ namespace Aikom.AIEngine.Editor
         {
             if (_asset != null)
             {   
+                EditorUtility.SetDirty(_asset);
                 _graph.TrimAndBuildAssetTree();
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();

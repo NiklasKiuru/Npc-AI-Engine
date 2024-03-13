@@ -1,10 +1,10 @@
 namespace Aikom.AIEngine
 {
-    public class RepeatUntilFail : DecoratorNode
-    {   
+    public class RepeatUntilSucces : DecoratorNode
+    {
         public override void OnBackPropagate(NodeStatus status)
         {
-            if(status != NodeStatus.Failure)
+            if (status != NodeStatus.Succes)
                 Tick();
             else
                 Parent.OnBackPropagate(status);
@@ -15,9 +15,9 @@ namespace Aikom.AIEngine
         }
 
         protected override NodeStatus Tick()
-        {   
+        {
             var subState = Child.Process();
-            if(subState != NodeStatus.Failure)
+            if (subState != NodeStatus.Succes)
             {
                 Context.CacheNode(this);
                 return NodeStatus.Cached;
@@ -25,7 +25,7 @@ namespace Aikom.AIEngine
             else if (IsCached)
                 this.StartBackPropagation(subState, Parent);
 
-            return NodeStatus.Failure;
+            return NodeStatus.Succes;
         }
     }
 

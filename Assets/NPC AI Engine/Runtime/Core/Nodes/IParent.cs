@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEngine;
 namespace Aikom.AIEngine
 {   
     /// <summary>
@@ -13,6 +9,11 @@ namespace Aikom.AIEngine
         /// Number of children this node has
         /// </summary>
         public int ChildCount { get; }
+
+        /// <summary>
+        /// Cached state of the parent
+        /// </summary>
+        public bool IsCached { get; set; }
 
         /// <summary>
         /// Gets the n.th child of this node
@@ -47,5 +48,15 @@ namespace Aikom.AIEngine
         /// </summary>
         /// <param name="status"></param>
         public void OnBackPropagate(NodeStatus status);
+    }
+
+    public static class ParentExtensions
+    {
+        public static void StartBackPropagation<T>(this IParent thisParent, NodeStatus status, T parent)
+            where T : IParent
+        {
+            thisParent.IsCached = false;
+            parent.OnBackPropagate(status);
+        }
     }
 }

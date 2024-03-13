@@ -14,5 +14,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _root: {fileID: 0}
   _LocalVariableNames: []
-  _nodes:
-  - _node: {fileID: 0}

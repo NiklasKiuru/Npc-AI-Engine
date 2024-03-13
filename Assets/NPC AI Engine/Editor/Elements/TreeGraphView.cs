@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using System.Linq;
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEditor.UIElements;
 
 namespace Aikom.AIEngine.Editor
 {
@@ -163,6 +164,13 @@ namespace Aikom.AIEngine.Editor
 
         }
 
+        public Root GetRoot()
+        {
+            if(_treeAsset != null)
+                return _treeAsset.Root;
+            return null;
+        }
+
         public void ShowNodeProperties(BTNode node)
         {   
             _selectedNode = node;
@@ -176,11 +184,21 @@ namespace Aikom.AIEngine.Editor
             NodePropertyBoard.title = NodeDescriptor.GetDefaultPrettyName(baseNode);
             NodePropertyBoard.contentContainer.Add(nameField);
             NodePropertyBoard.subTitle = node.GetDescriptor().Description;
-            var fields = FieldSerializationUtility.GetPropertyElements(baseNode);
+            var fields = FieldSerializationUtility.GetPropertyElements(baseNode, _treeAsset);
             foreach ( var field in fields)
             {
                 if (field != null)
                     NodePropertyBoard.contentContainer.Add(field);
+            }
+
+            if(baseNode is Root)
+            {
+                var childCountElement = new TextField("Total child count") { value = _treeAsset.Count.ToString() };
+                childCountElement.SetEnabled(false);
+                var depthElement = new IntegerField("Total valid depth") { value = _treeAsset.GetDepth() };
+                depthElement.SetEnabled(false);
+                NodePropertyBoard.contentContainer.Add(childCountElement);
+                NodePropertyBoard.contentContainer.Add(depthElement);
             }
         }
 

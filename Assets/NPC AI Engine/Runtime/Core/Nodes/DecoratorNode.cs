@@ -7,8 +7,8 @@ namespace Aikom.AIEngine
     {
         private NodeBase _child;
         public NodeBase Child { get { return _child; } }
-
         public int ChildCount => _child == null ? 0 : 1;
+        public bool IsCached { get; set; }
 
         public NodeBase GetChild(int index) => _child;
 
@@ -27,6 +27,16 @@ namespace Aikom.AIEngine
         public void RemoveChild(int index) => _child = null;
 
         public abstract void OnBackPropagate(NodeStatus status);
+
+        protected override void OnInit()
+        {
+            IsCached = false;
+        }
+
+        public override bool IsValid()
+        {
+            return Child != null;
+        }
     }
 }
 

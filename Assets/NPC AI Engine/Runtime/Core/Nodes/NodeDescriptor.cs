@@ -120,6 +120,8 @@ namespace Aikom.AIEngine
             { typeof(Inverter), new NodeDescriptor(_inverterDesc, 1, 1, _defaultSize) },
             { typeof(SeekNode), new NodeDescriptor(_seekDesc, 0, 0, _defaultSize) },
             { typeof(FindNode), new NodeDescriptor(_findDesc, 0, 0, _defaultSize) },
+            { typeof(RepeatUntilFail), new NodeDescriptor(_findDesc, 1, 1, _defaultSize) },
+            { typeof(RepeatUntilSucces), new NodeDescriptor(_findDesc, 1, 1, _defaultSize) },
         };
 
         public static NodeDescriptor Get<T>(T node) where T : NodeBase

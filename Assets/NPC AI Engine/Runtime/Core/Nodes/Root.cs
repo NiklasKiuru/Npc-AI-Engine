@@ -1,4 +1,5 @@
 using PlasticPipe.PlasticProtocol.Messages;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace Aikom.AIEngine
     {
         private NodeBase _child;
         public int ChildCount => _child == null ? 0 : 1;
+        public bool IsCached { get; set; }
 
         public bool AddChild(NodeBase node)
         {   

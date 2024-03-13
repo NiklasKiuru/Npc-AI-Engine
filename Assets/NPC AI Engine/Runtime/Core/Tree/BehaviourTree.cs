@@ -53,8 +53,9 @@ namespace Aikom.AIEngine
             Debug.Log("Stopped tree execution");
         }
 
-        internal void CacheNode(NodeBase node)
+        internal void CacheNode(IParent node)
         {
+            node.IsCached = true;
             _switch.GetInActive().Add(node);
         }
         

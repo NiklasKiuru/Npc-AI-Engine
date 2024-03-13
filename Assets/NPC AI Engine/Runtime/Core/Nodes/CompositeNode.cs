@@ -5,7 +5,6 @@ namespace Aikom.AIEngine
     public abstract class CompositeNode : NodeBase, IParent
     {   
         private List<NodeBase> _children = new(2);
-        private bool _isCached;
         private int _processIndex;
         private NodeStatus _breakStatus;
 
@@ -17,7 +16,7 @@ namespace Aikom.AIEngine
         /// <summary>
         /// Determines wether this node is cached in the engine in its current process cycle
         /// </summary>
-        protected bool IsCached { get { return _isCached; } set { _isCached = value; } }
+        public bool IsCached { get; set; }
 
         /// <summary>
         /// Cached process index
@@ -70,7 +69,7 @@ namespace Aikom.AIEngine
         {
             ProcessIndex++;
             if (status == _breakStatus || ProcessIndex >= ChildCount)
-                StartBackPropagation(status);
+                this.StartBackPropagation(status, Parent);
             else
                 Tick();
         }
@@ -90,14 +89,13 @@ namespace Aikom.AIEngine
                 if (subStatus == NodeStatus.Running)
                 {
                     Context.CacheNode(this);
-                    IsCached = true;
                     return NodeStatus.Cached;
                 }
                 else if (subStatus == _breakStatus)
                 {
                     if (IsCached)
                     {
-                        StartBackPropagation(subStatus);
+                        this.StartBackPropagation(subStatus, Parent);
                         break;
                     }
                     else
@@ -106,19 +104,13 @@ namespace Aikom.AIEngine
                 finalStatus = subStatus;
             }
             if (IsCached)
-                StartBackPropagation(finalStatus);
+                this.StartBackPropagation(finalStatus, Parent);
             return finalStatus;
         }
 
         protected virtual NodeStatus ProcessChild(int listIndex)
         {
             return Children[listIndex].Process();
-        }
-
-        protected void StartBackPropagation(NodeStatus status)
-        {
-            IsCached = false;
-            Parent.OnBackPropagate(status);
         }
 
         protected override void OnInit()

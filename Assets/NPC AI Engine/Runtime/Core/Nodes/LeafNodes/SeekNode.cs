@@ -24,7 +24,8 @@ namespace Aikom.AIEngine
         private Vector3 _offset;
 
         [ExposedVariable("Local variable cache")]
-        private string _localCacheName;
+        [CacheVariable(true)]
+        private CacheVariable _localCacheName;
 
         private Collider[] _objectCache;
         private float[] _results;
@@ -35,13 +36,13 @@ namespace Aikom.AIEngine
 
         protected override void OnInit()
         {
-            if (Context.GetLocalVariable<Collider[]>(_localCacheName) == null)
+            if (Context.GetLocalVariable<Collider[]>(_localCacheName.name) == null)
             {
                 _objectCache = new Collider[_maxTargets];
                 _results = new float[_maxTargets];
             }
 
-            Context.SetLocalVariable(_localCacheName, _objectCache);
+            Context.SetLocalVariable(_localCacheName.name, _objectCache);
         }
 
         protected override NodeStatus Tick()
@@ -84,11 +85,6 @@ namespace Aikom.AIEngine
                 j++;
             }
             return NodeStatus.Succes;
-        }
-
-        private void CreateArray()
-        {
-            
         }
     }
 }
