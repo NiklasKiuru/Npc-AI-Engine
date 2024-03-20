@@ -10,7 +10,32 @@ namespace Aikom.AIEngine
         /// </summary>
         /// <returns></returns>
         NodeStatus Process();
+
+        /// <summary>
+        /// Builds connections and references for this node
+        /// </summary>
+        /// <param name="tree"></param>
         void Build(BehaviourTree tree);
+
+        /// <summary>
+        /// Information used in editor
+        /// </summary>
+        NodeDescriptor Descriptor { get; }
+
+        /// <summary>
+        /// Custom unique id of this node
+        /// </summary>
+        int Id { get; }
+
+        /// <summary>
+        /// Parent of this node
+        /// </summary>
+        IParent Parent { get; }
+
+        /// <summary>
+        /// Execution context of the node
+        /// </summary>
+        public BehaviourTree Context { get; }
     }
 }
 

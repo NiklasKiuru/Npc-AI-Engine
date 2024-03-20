@@ -1,12 +1,20 @@
+using System;
 using System.Collections.Generic;
 
 namespace Aikom.AIEngine
 {
+    [Serializable]
     public abstract class CompositeNode : NodeBase, IParent
     {   
         private List<NodeBase> _children = new(2);
         private int _processIndex;
         private NodeStatus _breakStatus;
+
+        protected CompositeNode(int id) : base(id)
+        {
+        }
+
+        protected CompositeNode(int id, Position pos) : base(id, pos) { }
 
         /// <summary>
         /// Composite children. Either Leafs, Decorators or other Composites
@@ -65,13 +73,25 @@ namespace Aikom.AIEngine
             else
                 _children[index] = node;
         }
-        public virtual void OnBackPropagate(NodeStatus status)
+        public virtual void OnBackPropagate(NodeStatus status, INode sender)
         {
             ProcessIndex++;
             if (status == _breakStatus || ProcessIndex >= ChildCount)
+            {
+                OnInit();
                 this.StartBackPropagation(status, Parent);
+            }
+                
             else
-                Tick();
+            {
+                var substatus = Tick();
+                if(ProcessIndex >= ChildCount)
+                {
+                    OnInit();
+                    this.StartBackPropagation(substatus, Parent);
+                }
+                    
+            }   
         }
         public override bool IsValid()
         {
@@ -80,10 +100,11 @@ namespace Aikom.AIEngine
 
         protected override NodeStatus Tick()
         {
-            var finalStatus = NodeStatus.Undefined;
-            for (int i = ProcessIndex; i < Children.Count; i++)
+            var finalStatus = BreakStatus;
+            while (ProcessIndex < Children.Count)
             {
-                var subStatus = ProcessChild(i);
+                var subStatus = ProcessChild(ProcessIndex);
+                ProcessIndex++;
                 if (subStatus == NodeStatus.Cached)
                     return NodeStatus.Cached;
                 if (subStatus == NodeStatus.Running)
@@ -114,6 +135,11 @@ namespace Aikom.AIEngine
         }
 
         protected override void OnInit()
+        {
+            _processIndex = 0;
+        }
+
+        protected override void OnBuild()
         {
             _processIndex = 0;
         }

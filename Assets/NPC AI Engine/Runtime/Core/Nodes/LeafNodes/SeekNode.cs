@@ -30,19 +30,39 @@ namespace Aikom.AIEngine
         private Collider[] _objectCache;
         private float[] _results;
 
+        public SeekNode(int id) : base(id)
+        {
+        }
+
+        protected SeekNode(int id, Position pos) : base(id, pos)
+        {
+        }
+
+        public override INode Clone()
+        {
+            var newNode = new SeekNode(Id, Position);
+            newNode._validLayers = _validLayers;
+            newNode._obstructionMask = _obstructionMask;
+            newNode._radius = _radius;
+            newNode._maxTargets = _maxTargets;
+            newNode._offset = _offset;
+            newNode._localCacheName = _localCacheName;
+            return newNode;
+        }
+
         protected override void OnBuild()
         {
         }
 
         protected override void OnInit()
         {
-            if (Context.GetLocalVariable<Collider[]>(_localCacheName.name) == null)
+            if (Context.GetLocalVariable<Collider[]>(_localCacheName.Name) == null)
             {
                 _objectCache = new Collider[_maxTargets];
                 _results = new float[_maxTargets];
             }
 
-            Context.SetLocalVariable(_localCacheName.name, _objectCache);
+            Context.SetLocalVariable(_localCacheName.Name, _objectCache);
         }
 
         protected override NodeStatus Tick()

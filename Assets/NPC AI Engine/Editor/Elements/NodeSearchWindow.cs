@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor;
@@ -44,9 +43,8 @@ namespace Aikom.AIEngine.Editor
                 {
                     if (type.IsAbstract)
                         continue;
-                    var instance = CreateInstance(type);
                     var name = type.Name.Replace("Node", "");
-                    tree.Add(new SearchTreeEntry(new GUIContent(name, _indentationIcon)) { level = 2, userData = instance });
+                    tree.Add(new SearchTreeEntry(new GUIContent(name, _indentationIcon)) { level = 2, userData = type });
                 }
             }
 
@@ -59,7 +57,7 @@ namespace Aikom.AIEngine.Editor
             var mousePosition = _window.rootVisualElement.ChangeCoordinatesTo(_window.rootVisualElement.parent,
                 context.screenMousePosition - _window.position.position);
             var graphMousePosition = _graphView.contentViewContainer.WorldToLocal(mousePosition);
-            var data = SearchTreeEntry.GetUserDataNode<NodeBase>();
+            var data = (Type)SearchTreeEntry.userData;
             if (data != null)
             {
                 _graphView.CreateNewDisplayNode(data, graphMousePosition);
@@ -68,14 +66,6 @@ namespace Aikom.AIEngine.Editor
             }
             OnWindowClosed?.Invoke(true);
             return false;
-        }
-    }
-
-    internal static class TreeEntryExtensions
-    {
-        public static T GetUserDataNode<T>(this SearchTreeEntry entry) where T : NodeBase
-        {
-            return (T)entry.userData;
         }
     }
 }

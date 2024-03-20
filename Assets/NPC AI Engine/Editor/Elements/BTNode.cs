@@ -14,7 +14,7 @@ namespace Aikom.AIEngine.Editor
         private static readonly Color _validColor = new Color(0, 1, 0.2f, 0.50f);
         private static readonly Color _invalidColor = new Color(1, 0, 0, 0.50f);
 
-        private NodeDescriptor _descriptor;
+        //private NodeDescriptor _descriptor;
         private NodeBase _base;
         private TreeGraphView _view;
         private bool _hasValidConnections;
@@ -65,9 +65,8 @@ namespace Aikom.AIEngine.Editor
         /// </summary>
         public event Action<BTNode> OnValidate;
 
-        public BTNode(NodeBase node, string name, NodeDescriptor desc, TreeGraphView view) 
+        public BTNode(NodeBase node, string name, TreeGraphView view) 
         {
-            _descriptor = desc;
             _base = node;
             _view = view;
 
@@ -84,10 +83,10 @@ namespace Aikom.AIEngine.Editor
             inputContainer.style.alignItems = Align.Center;
             inputContainer.style.backgroundColor = outputContainer.style.backgroundColor;
 
-            var childCount = _descriptor.MaxChildren < 0 ? _descriptor.MinChildren : _descriptor.MaxChildren == 0 ? 0 : 1;
+            var childCount = Base.Descriptor.MaxChildren < 0 ? Base.Descriptor.MinChildren : Base.Descriptor.MaxChildren == 0 ? 0 : 1;
             int currentChildren = 0;
             if (node is IParent parent)
-                currentChildren = parent.ChildCount;
+                currentChildren = node.Position.outputIds == null ? 0 : node.Position.outputIds.Count;
             childCount = Mathf.Max(childCount, currentChildren);
             if (childCount > 1)
             {
@@ -108,7 +107,7 @@ namespace Aikom.AIEngine.Editor
             outputContainer.style.flexDirection = FlexDirection.Row;
             outputContainer.style.justifyContent = Justify.SpaceAround;
             titleContainer.Q<Label>("title-label").style.marginLeft = 0;
-            style.minWidth = _descriptor.DefaultWindowSize.x;
+            style.minWidth = Base.Descriptor.DefaultWindowSize.x;
 
             RefreshAndDontExpand();
         }
@@ -205,16 +204,17 @@ namespace Aikom.AIEngine.Editor
 
         private void AddChildOption() 
         { 
-            if(outputContainer.childCount < _descriptor.MaxChildren || _descriptor.MaxChildren < 0)
+            if(outputContainer.childCount < Base.Descriptor.MaxChildren || Base.Descriptor.MaxChildren < 0)
             {
                 CreateChild();
+                (Base as IParent).AddChild(null);
                 RefreshAndDontExpand();
             }
         }
 
         private void RemoveChildOption()
         {
-            if(outputContainer.childCount > _descriptor.MinChildren)
+            if(outputContainer.childCount > Base.Descriptor.MinChildren)
             {
                 var port = outputContainer[childCount] as Port;
                 if(port.connected)
@@ -225,6 +225,7 @@ namespace Aikom.AIEngine.Editor
 
                 }
                 outputContainer.RemoveAt(outputContainer.childCount - 1);
+                (Base as IParent).RemoveChild(outputContainer.childCount - 1);
                 RefreshAndDontExpand();
             }
         }
@@ -233,10 +234,11 @@ namespace Aikom.AIEngine.Editor
         /// Gets and updates the descriptor
         /// </summary>
         /// <returns></returns>
-        public NodeDescriptor GetDescriptor()
+        public NodeDescriptor UpdateDescriptor()
         {
-            _descriptor.SetPosition(GetPosition());
-            return _descriptor;
+            Base.SetWindowPosition(GetPosition());
+            Base.SetName(title);
+            return Base.Descriptor;
         }
 
         /// <summary>
@@ -263,7 +265,7 @@ namespace Aikom.AIEngine.Editor
         /// <param name="name"></param>
         public void SetName(string name)
         {
-            _descriptor.SetName(name);
+            Base.SetName(name);
             title = name;
         }
 
@@ -287,6 +289,12 @@ namespace Aikom.AIEngine.Editor
                 port.OnDisconnect -= VoidParent;
             }
                 
+        }
+
+        public override void SetPosition(Rect newPos)
+        {
+            base.SetPosition(newPos);
+            Base.SetWindowPosition(newPos);
         }
     }
 

@@ -14,7 +14,5 @@ namespace Aikom.AIEngine
             ToolTip = toolTip;
         }
     }
-
-    
 }
 

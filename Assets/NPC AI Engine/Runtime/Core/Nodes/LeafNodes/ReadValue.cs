@@ -11,6 +11,21 @@ namespace Aikom.AIEngine
         [ExposedVariable("Cache space")]
         private CacheSpace _space;
 
+        public ReadValue(int id) : base(id)
+        {
+        }
+
+        protected ReadValue(int id, Position pos) : base(id, pos) { }
+
+        public override INode Clone()
+        {
+            var newNode = new ReadValue(Id, Position);
+            newNode._cacheRead = _cacheRead;
+            newNode._localCacheWrite = _localCacheWrite;
+            newNode._space = _space;
+            return newNode;
+        }
+
         protected override void OnBuild()
         {
         }

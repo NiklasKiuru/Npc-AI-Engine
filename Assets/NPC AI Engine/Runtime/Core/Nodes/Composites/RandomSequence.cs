@@ -8,6 +8,11 @@ namespace Aikom.AIEngine
     public class RandomSequence : Sequence
     {
         private IList<int> _randomIndecies;
+
+        public RandomSequence(int id) : base(id)
+        {
+        }
+
         protected override void OnInit()
         {
             base.OnInit();

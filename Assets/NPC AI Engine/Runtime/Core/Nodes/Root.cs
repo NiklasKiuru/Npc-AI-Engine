@@ -1,13 +1,17 @@
-using PlasticPipe.PlasticProtocol.Messages;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 namespace Aikom.AIEngine
 {
-    public class Root : NodeBase, IParent
+    public sealed class Root : NodeBase, IParent
     {
         private NodeBase _child;
+
+        public Root(int id) : base(id)
+        {
+        }
+
+        private Root(int id, Position pos) : base(id, pos)
+        {
+        }
+
         public int ChildCount => _child == null ? 0 : 1;
         public bool IsCached { get; set; }
 
@@ -23,19 +27,23 @@ namespace Aikom.AIEngine
 
         public NodeBase GetChild(int index) => _child;
 
-        public void OnBackPropagate(NodeStatus status)
+        public void OnBackPropagate(NodeStatus status, INode sender)
         {
             // Notify context and abort tree
-            if(status != NodeStatus.Running || status != NodeStatus.Cached)
+            if(status != NodeStatus.Cached)
             {
-                Debug.Log("Root exited with status: " + status);
-                Context.Stop();
+                Context.CacheNode(this);
             }
         }
 
         protected override NodeStatus Tick()
         {   
             var subStatus = _child.Process();
+            if(subStatus != NodeStatus.Cached)
+            {
+                Context.CacheNode(this);
+            }
+
             return subStatus;
         }
 
@@ -54,6 +62,11 @@ namespace Aikom.AIEngine
 
         protected override void OnBuild()
         {
+        }
+
+        public override INode Clone()
+        {
+            return new Root(Id, Position);
         }
     }
 

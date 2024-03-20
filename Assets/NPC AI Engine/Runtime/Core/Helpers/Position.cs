@@ -2,14 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Aikom.AIEngine
 {
     [Serializable]
-    public class CacheVariable
+    public struct Position
     {
-        public CacheSpace Space;
-        public string Name = "";
+        public int inputId;
+        public List<int> outputIds;
+
+        public bool IsAttached => inputId != 0;
     }
 }

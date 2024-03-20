@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace Aikom.AIEngine
 {   
     /// <summary>
@@ -47,7 +49,7 @@ namespace Aikom.AIEngine
         /// to send its state higher in the hierarchy
         /// </summary>
         /// <param name="status"></param>
-        public void OnBackPropagate(NodeStatus status);
+        public void OnBackPropagate(NodeStatus status, INode sender);
     }
 
     public static class ParentExtensions
@@ -56,7 +58,27 @@ namespace Aikom.AIEngine
             where T : IParent
         {
             thisParent.IsCached = false;
-            parent.OnBackPropagate(status);
+#if LOG_STATES
+            Debug.Log("BP from: " + thisParent.GetType().Name + " To: " + parent.GetType().Name);
+#endif
+            parent.OnBackPropagate(status, thisParent);
+            thisParent.Context.OnBackpropagateNotify(thisParent, parent);
+        }
+
+        public static Position GetPosition(this IParent parent)
+        {
+            var pos = new Position();
+            pos.inputId = parent.Parent == null ? 0 : parent.Parent.Id;
+            pos.outputIds = new();
+            for(int i = 0; i < parent.ChildCount; i++)
+            {
+                int id = 0;
+                var child = parent.GetChild(i);
+                if(child != null)
+                    id = child.Id;
+                pos.outputIds.Add(id);
+            }
+            return pos;
         }
     }
 }

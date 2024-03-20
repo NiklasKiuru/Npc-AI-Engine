@@ -2,7 +2,8 @@ namespace Aikom.AIEngine
 {
     public class Inverter : DecoratorNode
     {
-
+        public Inverter(int id) : base(id) { }
+        protected Inverter(int id, Position pos) : base(id, pos) { }
 
         protected override void OnInit()
         {
@@ -14,9 +15,9 @@ namespace Aikom.AIEngine
             return Invert(substatus);
         }
 
-        public override void OnBackPropagate(NodeStatus status)
+        public override void OnBackPropagate(NodeStatus status, INode sender)
         {
-            Parent.OnBackPropagate(Invert(status));
+            this.StartBackPropagation(Invert(status), Parent);
         }
 
         private NodeStatus Invert(NodeStatus status)
@@ -35,6 +36,11 @@ namespace Aikom.AIEngine
 
         protected override void OnBuild()
         {
+        }
+
+        public override INode Clone()
+        {
+            return new Inverter(Id, Position);
         }
     }
 

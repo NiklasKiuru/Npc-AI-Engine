@@ -6,28 +6,36 @@ namespace Aikom.AIEngine
     [CreateAssetMenu(fileName = "New Behaviour Tree", menuName = "Behaviour Tree/Tree")]
     public class TreeAsset : ScriptableObject
     {
-        [HideInInspector][SerializeField] Root _root;
-        [ReadOnly][SerializeField] List<string> _LocalVariableNames = new List<string>();
+        [ReadOnly][SerializeReference] Root _root;
+        [ReadOnly][SerializeField] List<string> _localVariableNames = new List<string>();
 
-        private List<NodeWrapper> _nodes = new();
-        private Dictionary<int, NodeWrapper> _lookUp = new();
+        [ReadOnly][SerializeReference] private List<NodeBase> _nodes = new();
 
         public Root Root
         {
             get
             {
                 if (_root == null)
-                    _root = CreateInstance<Root>();
+                {
+                    _root = new Root(-1);
+//                    _root = CreateInstance<Root>();
+//#if UNITY_EDITOR
+//                    AssetDatabase.AddObjectToAsset(_root, this);
+//                    EditorUtility.SetDirty(this);
+//                    AssetDatabase.SaveAssets();
+//#endif            
+                }
+                    
                 return _root;
             }
         }
 
-        public NodeWrapper this[int index]
+        public NodeBase this[int index]
         {
             get { return _nodes[index]; }
         } 
 
-        public List<string> LocalVariables => _LocalVariableNames;
+        public List<string> LocalVariables => _localVariableNames;
         public int Count => _nodes.Count;
 
         /// <summary>
@@ -36,18 +44,7 @@ namespace Aikom.AIEngine
         /// <param name="id"></param>
         public void RemoveNode(int id)
         {
-            CheckSerialization();
-            _lookUp.Remove(id);
-            var index = 0;
-            for(int i =  0; i < _nodes.Count; i++)
-            {
-                if (_nodes[i].Id == id)
-                {
-                    index = i; 
-                    break;
-                }
-            }
-            _nodes.RemoveAt(index);
+            _nodes.Remove(_nodes.Find((n) => n.Id == id));
         }
 
         /// <summary>
@@ -55,42 +52,21 @@ namespace Aikom.AIEngine
         /// </summary>
         /// <param name="desc"></param>
         /// <param name="node"></param>
-        public void AddNode(NodeDescriptor desc, NodeBase node)
+        public void AddNode(NodeBase node)
         {
-            CheckSerialization();
-            var wrapper = new NodeWrapper(node, desc);
-            _nodes.Add(wrapper);
-            _lookUp.Add(wrapper.Id, wrapper);
+            _nodes.Add(node);
         }
 
         public NodeBase GetNode(int id)
         {
-            CheckSerialization();
-            if (_lookUp.TryGetValue(id, out var val))
-                return val.Node;
-            return null;
-        }
-
-        public NodeBase GetNodeInIteration(int index)
-        {
-            return _nodes[index].Node;
-        }
-
-        public NodeDescriptor GetDescriptor(int id)
-        {
-            CheckSerialization();
-            if(_lookUp.TryGetValue(id, out var val))
-                return val.Descriptor;
-            return default;
-        }
-
-        public void UpdateDescriptor(NodeDescriptor desc)
-        {
-            CheckSerialization();
-            if (_lookUp.TryGetValue(desc.Id, out var wrapper))
+            if (id == -1)
+                return Root;
+            for(int i = 0; i < _nodes.Count; i++)
             {
-                wrapper.Descriptor = desc;
-            } 
+                if(_nodes[i].Id == id)
+                    return _nodes[i];
+            }
+            return null;
         }
 
         /// <summary>
@@ -99,14 +75,14 @@ namespace Aikom.AIEngine
         /// <returns></returns>
         public int GetDepth()
         {
-            if(_nodes.Count == 0) 
+            if(_nodes.Count == 0 || Root.ChildCount == 0) 
                 return 0;
 
             var leaves = new List<LeafNode>();
             for (int i = 0; i < _nodes.Count; i++)
             {
                 var wrapper = _nodes[i];
-                if (wrapper.Node is LeafNode leaf)
+                if (wrapper is LeafNode leaf)
                     leaves.Add(leaf);
             }
 
@@ -119,8 +95,13 @@ namespace Aikom.AIEngine
                 while(true)
                 {
                     localDepth++;
+                    if(parent == null)
+                    {
+                        localDepth = 0;
+                        break;
+                    }
                     parent = parent.Parent as NodeBase;
-                    if (parent is Root || parent == null)
+                    if (parent is Root)
                         break;
                 }
                 if(localDepth > maxDepth)
@@ -139,20 +120,6 @@ namespace Aikom.AIEngine
                 return 0;
 
             return -1;
-        }
-
-        // Checks if the dictionary has been lost on serialization
-        private void CheckSerialization()
-        {
-            if(_nodes.Count != _lookUp.Count)
-            {   
-                _lookUp.Clear();
-                for(int i = 0; i < _nodes.Count; i++)
-                {
-                    var node = _nodes[i];
-                    _lookUp.TryAdd(node.Id, node);
-                }
-            }
         }
     }
 

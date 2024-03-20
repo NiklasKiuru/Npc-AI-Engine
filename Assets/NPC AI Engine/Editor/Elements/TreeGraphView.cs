@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -6,8 +5,8 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 using System.Linq;
 using System;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEditor.UIElements;
+using Codice.Client.Common.FsNodeReaders;
 
 namespace Aikom.AIEngine.Editor
 {
@@ -60,12 +59,63 @@ namespace Aikom.AIEngine.Editor
                 {
                     if(node is BTNode visNode)
                     {
-                        _treeAsset.RemoveNode(visNode.GetDescriptor().Id);
+                        _treeAsset.RemoveNode(visNode.Base.Id);
                     }
                 }
 
+                AssetDatabase.SaveAssets();
+                EditorUtility.SetDirty(_treeAsset);
                 DeleteSelection();
             };
+        }
+
+        public void OnRuntimeTick(INode node, NodeStatus status)
+        {
+            foreach(BTNode nodeElement in nodes)
+            {
+                var border = nodeElement.Q<VisualElement>("selection-border");
+                if(nodeElement.Base.Id == node.Id)
+                {
+                    border.style.borderBottomWidth = 3;
+                    var color = new Color();
+                    switch (status)
+                    {
+                        case NodeStatus.Succes:
+                            color = Color.green; 
+                            break;
+                        case NodeStatus.Failure:
+                            color = Color.red;
+                            break;
+                        case NodeStatus.Cached:
+                            color = Color.blue; 
+                            break;
+                        case NodeStatus.Running:
+                            color = Color.gray;
+                            break;
+                    }
+                    var targetColor = new Color(color.r, color.g, color.b, 0);
+                    nodeElement.experimental.animation.Start(
+                        color, targetColor, 1000,
+                        (v, c) => border.style.borderBottomColor = c);
+                }
+            }
+        }
+
+        public void OnRuntimeBackPropagate(INode sender, IParent reciever)
+        {
+            foreach(BTNode nodeElement in nodes)
+            {
+                var border = nodeElement.Q<VisualElement>("selection-border");
+                if(nodeElement.Base.Id == sender.Id)
+                {
+                    border.style.borderTopWidth = 3;
+                    var c = Color.yellow;
+                    var target = new Color(c.r, c.g, c.b, 0);
+                    nodeElement.experimental.animation.Start(
+                        c, target, 1000,
+                        (v, c) => border.style.borderTopColor = c);
+                }
+            }
         }
 
         /// <summary>
@@ -94,9 +144,10 @@ namespace Aikom.AIEngine.Editor
                 return;
             foreach(BTNode node in nodes)
             {
-                // Update descriptors
-                var desc = node.GetDescriptor();
-                _treeAsset.UpdateDescriptor(desc);
+                // Update descriptors and position
+                var desc = node.UpdateDescriptor();
+                if (node.Base is not IParent)
+                    node.Base.UpdatePositionData(new Position() { inputId = node.Base.Parent == null ? 0 : node.Base.Parent.Id, outputIds = new() });               
 
                 // Remove unused child slots from composites
                 if (node.Base is IParent parent)
@@ -114,11 +165,16 @@ namespace Aikom.AIEngine.Editor
                             
                     }
                     var index = 0;
-                    while(emptyChildren > 0 && parent.ChildCount - emptyChildren > desc.MinChildren)
-                    {
-                        parent.RemoveChild(emptyIndecies[index]);
+                    while(emptyChildren > 0 && parent.ChildCount - emptyChildren >= desc.MinChildren)
+                    {   
+                        var pos = emptyIndecies[index];
+                        node.outputContainer.RemoveAt(pos);
+                        parent.RemoveChild(pos);
                         emptyChildren--;
                     }
+                    node.Base.UpdatePositionData(parent.GetPosition());
+                    node.UpdateValidityByConnections();
+                    EditorUtility.SetDirty(_treeAsset);
                 }
 
             }
@@ -141,34 +197,32 @@ namespace Aikom.AIEngine.Editor
             CreateRoot(_treeAsset.Root);
             for(int i = 0; i < _treeAsset.Count; i++)
             {   
-                var wrapper = _treeAsset[i];
-                var desc = wrapper.Descriptor;
-                CreateNode(wrapper.Node, desc.Position, desc, desc.DisplayName);
+                var node = _treeAsset[i];
+                var desc = node.Descriptor;
+                CreateDisplayNode(node, desc.Position, desc.DisplayName);
             }
 
             // Connections
             foreach(BTNode visNode in nodes)
             {
-                if(visNode.Base is IParent parent && parent.ChildCount > 0)
-                {   
-                    for(int i = 0; i < parent.ChildCount; i++)
+                if(visNode.Base is IParent parent)
+                {
+                    var pos = visNode.Base.Position;
+                    for(int i = 0; i < pos.outputIds.Count; i++)
                     {
-                        var child = parent.GetChild(i);
-                        var port = visNode.outputContainer[i] as BTPort;
-                        var visChild = nodes.First((n) => { return (n as BTNode).Base == child; });
-                        var edge = port.ConnectTo(visChild.inputContainer[0] as BTPort);
-                        AddElement(edge);
+                        if (pos.outputIds[i] != 0)
+                        {
+                            var child = _treeAsset.GetNode(pos.outputIds[i]);
+                            if (child == null)
+                                throw new Exception("Something went wrong with previous serialization cycle");
+                            var port = visNode.outputContainer[i] as BTPort;
+                            var visChild = nodes.First((n) => { return (n as BTNode).Base.Id == child.Id; });
+                            var edge = port.ConnectTo(visChild.inputContainer[0] as BTPort);
+                            AddElement(edge);
+                        }
                     }
                 }
             }
-
-        }
-
-        public Root GetRoot()
-        {
-            if(_treeAsset != null)
-                return _treeAsset.Root;
-            return null;
         }
 
         public void ShowNodeProperties(BTNode node)
@@ -179,11 +233,12 @@ namespace Aikom.AIEngine.Editor
                 return;
 
             var baseNode = node.Base;
-            var nameField = new TextField("Name") { value = node.GetDescriptor().DisplayName };
+            var desc = baseNode.Descriptor;
+            var nameField = new TextField("Name") { value = desc.DisplayName };
             nameField.RegisterValueChangedCallback((v) => _selectedNode.SetName(v.newValue));
             NodePropertyBoard.title = NodeDescriptor.GetDefaultPrettyName(baseNode);
             NodePropertyBoard.contentContainer.Add(nameField);
-            NodePropertyBoard.subTitle = node.GetDescriptor().Description;
+            NodePropertyBoard.subTitle = desc.Description;
             var fields = FieldSerializationUtility.GetPropertyElements(baseNode, _treeAsset);
             foreach ( var field in fields)
             {
@@ -219,13 +274,13 @@ namespace Aikom.AIEngine.Editor
         /// </summary>
         /// <param name="node"></param>
         /// <param name="pos"></param>
-        public void CreateNewDisplayNode(NodeBase node, Vector2 pos)
+        public void CreateNewDisplayNode(Type type, Vector2 pos)
         {   
             if(_treeAsset == null) 
                 return;
-            var desc = NodeDescriptor.GetDefaultDescriptor(node, _treeAsset);
-            var name = NodeDescriptor.GetDefaultPrettyName(node);
-            var uiNode = CreateNode(node, new Rect(pos, desc.DefaultWindowSize), desc, name);
+            var node = NodeFactory.CreateNew(type);
+            var desc = node.Descriptor;
+            var uiNode = CreateDisplayNode(node, new Rect(pos, desc.DefaultWindowSize), desc.DisplayName);
             
             if(_delayedConnection != null)
             {
@@ -233,18 +288,18 @@ namespace Aikom.AIEngine.Editor
                 {
                     var edge = port.ConnectTo(_delayedConnection.Origin);
                     AddElement(edge);
-                    //uiNode.UpdateValidityByConnections();
                 }
             }
             _delayedConnection = null;
 
-            _treeAsset.AddNode(desc, node);
+            _treeAsset.AddNode(node);
             EditorUtility.SetDirty(_treeAsset);
+            AssetDatabase.SaveAssets();
         }
 
-        private BTNode CreateNode(NodeBase node, Rect pos, NodeDescriptor desc, string name = "")
+        private BTNode CreateDisplayNode(NodeBase node, Rect pos, string name = "")
         {
-            var uiNode = new BTNode(node, name, desc, this);
+            var uiNode = new BTNode(node, name, this);
             uiNode.SetPosition(pos);
             AddElement(uiNode);
             return uiNode;
@@ -266,8 +321,8 @@ namespace Aikom.AIEngine.Editor
 
         private BTNode CreateRoot(Root root)
         {
-            var desc = NodeDescriptor.GetDefaultDescriptor(root, _treeAsset);
-            var node = CreateNode(root, new Rect(new Vector2(_editorWindow.position.xMax /2, _editorWindow.position.yMax / 2), desc.DefaultWindowSize), desc, "Root");
+            var desc = root.Descriptor;
+            var node = CreateDisplayNode(root, new Rect(new Vector2(_editorWindow.position.xMax /2, _editorWindow.position.yMax / 2), desc.DefaultWindowSize), "Root");
             node.capabilities &= ~Capabilities.Deletable;
             node.capabilities &= ~Capabilities.Movable;
             return node;

@@ -12,8 +12,390 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f835f7f5f8e589344886db696e84521e, type: 3}
   m_Name: New Behaviour Tree
   m_EditorClassIdentifier: 
-  _root: {fileID: 0}
-  _LocalVariableNames:
-  - iohujboi
-  - ijhoijh
-  - 
+  _root:
+    rid: 7765545317183520771
+  _localVariableNames:
+  - WanderPath
+  - Target
+  _nodes:
+  - rid: 7765545318415073280
+  - rid: 7765545318415073281
+  - rid: 7765545318415073282
+  - rid: 7765545318415073283
+  - rid: 7765545318415073284
+  - rid: 7765545318415073285
+  - rid: 7765545424669376513
+  - rid: 7765545424669376514
+  - rid: 7765545424669376515
+  - rid: 7765545424669376516
+  - rid: 7765545424669376517
+  - rid: 7765545424669376518
+  - rid: 7765545424669376519
+  - rid: 7765545424669376521
+  - rid: 7765545424669376522
+  - rid: 7765545424669376523
+  - rid: 7765545424669376541
+  references:
+    version: 2
+    RefIds:
+    - rid: 7765545317183520771
+      type: {class: Root, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: Root node of the tree
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 922
+            y: 412
+            width: 200
+            height: 77
+          _name: Root
+        _position:
+          inputId: 0
+          outputIds: c185ab82
+        _id: -1
+    - rid: 7765545318415073280
+      type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: Executes children from left to right until either one fails
+            or all succeed
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 880
+            y: 627
+            width: 200
+            height: 101
+          _name: Roaming
+        _position:
+          inputId: -2102688319
+          outputIds: 7b2c210b702343fd40e54753690e3a1a
+        _id: -1473874482
+    - rid: 7765545318415073281
+      type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: Finds object references from scene hierarchy
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 592
+            y: 756
+            width: 200
+            height: 101
+          _name: RepeatUntilSucces
+        _position:
+          inputId: -1473874482
+          outputIds: 40424811
+        _id: 186723451
+    - rid: 7765545318415073282
+      type: {class: FindPathNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 592
+            y: 990
+            width: 200
+            height: 69
+          _name: FindPath
+        _position:
+          inputId: 186723451
+          outputIds: 
+        _id: 289948224
+        _target: 0
+        _maxDistance: 5
+        _cacheLookUp:
+          Space: 0
+          Name: WanderPath
+    - rid: 7765545318415073283
+      type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 880
+            y: 843
+            width: 200
+            height: 69
+          _name: SetDestination
+        _position:
+          inputId: -1473874482
+          outputIds: 
+        _id: -45931664
+        _pathLocation:
+          Space: 0
+          Name: WanderPath
+    - rid: 7765545318415073284
+      type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: Finds object references from scene hierarchy
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1166
+            y: 867
+            width: 200
+            height: 101
+          _name: RepeatUntilSucces
+        _position:
+          inputId: -1473874482
+          outputIds: 089d6336
+        _id: 1397220672
+    - rid: 7765545318415073285
+      type: {class: CheckDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1166
+            y: 1059
+            width: 200
+            height: 69
+          _name: CheckDestination
+        _position:
+          inputId: 1397220672
+          outputIds: 
+        _id: 912497928
+    - rid: 7765545424669376513
+      type: {class: SeekNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -114
+            y: 756
+            width: 200
+            height: 69
+          _name: Seek
+        _position:
+          inputId: 978879680
+          outputIds: 
+        _id: 1173174665
+    - rid: 7765545424669376514
+      type: {class: Selector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 627
+            y: 508
+            width: 200
+            height: 101
+          _name: Select State
+        _position:
+          inputId: -1
+          outputIds: c084583ace7526a8
+        _id: -2102688319
+    - rid: 7765545424669376515
+      type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 120
+            y: 627
+            width: 200
+            height: 101
+          _name: Chasing
+        _position:
+          inputId: -2102688319
+          outputIds: 8939ed45d5f7f6173b959cf8e533c38c
+        _id: 978879680
+    - rid: 7765545424669376516
+      type: {class: FindPathNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -14
+            y: 899
+            width: 200
+            height: 69
+          _name: FindPath
+        _position:
+          inputId: 978879680
+          outputIds: 
+        _id: 402061269
+        _target: 0
+        _maxDistance: 0
+        _cacheLookUp:
+          Space: 0
+          Name: 
+    - rid: 7765545424669376517
+      type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 150
+            y: 1006
+            width: 200
+            height: 69
+          _name: SetDestination
+        _position:
+          inputId: 978879680
+          outputIds: 
+        _id: -123955909
+        _pathLocation:
+          Space: 0
+          Name: 
+    - rid: 7765545424669376518
+      type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 374
+            y: 862
+            width: 200
+            height: 101
+          _name: RepeatUntilSucces
+        _position:
+          inputId: 978879680
+          outputIds: 1d8258e8
+        _id: -1933364251
+    - rid: 7765545424669376519
+      type: {class: CheckDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 374
+            y: 1106
+            width: 200
+            height: 69
+          _name: CheckDestination
+        _position:
+          inputId: -1933364251
+          outputIds: 
+        _id: -396852707
+    - rid: 7765545424669376521
+      type: {class: VoidNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: End point node with no action. Always returns succes
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1401
+            y: 972
+            width: 200
+            height: 69
+          _name: Return back to roaming
+        _position:
+          inputId: 440012393
+          outputIds: 
+        _id: -1197653191
+    - rid: 7765545424669376522
+      type: {class: DelayNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: Delayes the execution of its child by defined time limit
+            in seconds
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1704
+            y: 899
+            width: 200
+            height: 101
+          _name: Delay
+        _position:
+          inputId: 440012393
+          outputIds: 20378434
+        _id: -536061024
+        _delay: 2
+    - rid: 7765545424669376523
+      type: {class: VoidNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: End point node with no action. Always returns succes
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1704
+            y: 1072
+            width: 200
+            height: 69
+          _name: Sit still for delay
+        _position:
+          inputId: -536061024
+          outputIds: 
+        _id: 881080096
+    - rid: 7765545424669376541
+      type: {class: RandomSelector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 1519
+            y: 742
+            width: 200
+            height: 101
+          _name: Idle
+        _position:
+          inputId: -1473874482
+          outputIds: 39439db8a05b0ce0
+        _id: 440012393

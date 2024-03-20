@@ -14,6 +14,21 @@ namespace Aikom.AIEngine
         [ExposedVariable("Local variable cache")]
         private string _localVariable;
 
+        public FindNode(int id) : base(id)
+        {
+        }
+
+        protected FindNode(int id, Position pos) : base(id, pos) { }
+
+        public override INode Clone()
+        {
+            var newNode = new FindNode(Id, Position);
+            newNode._findAll = _findAll;
+            newNode._type = _type;
+            newNode._localVariable = _localVariable;
+            return newNode;
+        }
+
         protected override void OnBuild()
         {
         }

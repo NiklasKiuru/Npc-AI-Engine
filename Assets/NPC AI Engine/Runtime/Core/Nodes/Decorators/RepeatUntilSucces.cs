@@ -2,12 +2,23 @@ namespace Aikom.AIEngine
 {
     public class RepeatUntilSucces : DecoratorNode
     {
-        public override void OnBackPropagate(NodeStatus status)
+        public RepeatUntilSucces(int id) : base(id)
+        {
+        }
+
+        protected RepeatUntilSucces(int id, Position pos) : base(id, pos) { }
+
+        public override INode Clone()
+        {
+            return new RepeatUntilSucces(Id, Position);
+        }
+
+        public override void OnBackPropagate(NodeStatus status, INode sender)
         {
             if (status != NodeStatus.Succes)
                 Tick();
             else
-                Parent.OnBackPropagate(status);
+                this.StartBackPropagation(status, Parent);
         }
 
         protected override void OnBuild()

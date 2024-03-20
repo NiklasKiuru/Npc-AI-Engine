@@ -17,6 +17,19 @@ namespace Aikom.AIEngine
         [ExposedVariable("Object 2")]
         private string _cacheRead2;
 
+        public EqualsNode(int id) : base(id) { }
+        protected EqualsNode(int id, Position pos) : base(id, pos) { }
+
+        public override INode Clone()
+        {
+            var newNode = new EqualsNode(Id, Position);
+            newNode._space1 = _space1;
+            newNode._space2 = _space2;
+            newNode._cacheRead1 = _cacheRead1;
+            newNode._cacheRead2 = _cacheRead2;
+            return newNode;
+        }
+
         protected override void OnBuild()
         {
         }

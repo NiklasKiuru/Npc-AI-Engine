@@ -122,11 +122,11 @@ namespace Aikom.AIEngine.Editor
                 bool lockSelector = false;
                 if (cacheAttr != null && cacheAttr.RestrictSelection)
                 {
-                    val.space = cacheAttr.Space;
+                    val.Space = cacheAttr.Space;
                     lockSelector = true;
                 }
-                    
-                var list = new List<string>();
+
+                var list = new List<string>() { "" };
                 foreach(var option in asset.LocalVariables)
                 {
                     if(string.IsNullOrEmpty(option)) 
@@ -134,11 +134,17 @@ namespace Aikom.AIEngine.Editor
                     list.Add(option);
                 }
 
-                var textField = new DropdownField(info.Attribute.Name, list, 0);
-                textField.RegisterValueChangedCallback((evt) => val.name = evt.newValue);
-                var enumField = new EnumField() { value = val.space };
+                var textField = new DropdownField(info.Attribute.Name, list, val.Name);
+                textField.RegisterValueChangedCallback((evt) => {
+                    val.Name = evt.newValue;
+                    info.Field.SetValue(node, val);
+                }) ;
+                var enumField = new EnumField() { value = val.Space };
                 if(!lockSelector)
-                    enumField.RegisterValueChangedCallback((evt) => { val.space = (CacheSpace)evt.newValue; });
+                    enumField.RegisterValueChangedCallback((evt) => { 
+                        val.Space = (CacheSpace)evt.newValue;
+                        info.Field.SetValue(node, val);
+                    });
                 else
                     enumField.SetEnabled(false);
                 textField.Add(enumField);
