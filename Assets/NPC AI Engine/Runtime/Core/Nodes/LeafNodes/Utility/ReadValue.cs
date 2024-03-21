@@ -1,14 +1,17 @@
+using UnityEngine;
+
 namespace Aikom.AIEngine
 {
+    [EditorNode("Reads a value from one cache space to another")]
     public class ReadValue : LeafNode 
     {   
-        [ExposedVariable("Read from")]
+        [Tooltip("Read from"), SerializeField]
         private string _cacheRead;
 
-        [ExposedVariable("Write to")]
+        [Tooltip("Write to"), SerializeField]
         private string _localCacheWrite;
 
-        [ExposedVariable("Cache space")]
+        [Tooltip("Cache space")]
         private CacheSpace _space;
 
         public ReadValue(int id) : base(id)

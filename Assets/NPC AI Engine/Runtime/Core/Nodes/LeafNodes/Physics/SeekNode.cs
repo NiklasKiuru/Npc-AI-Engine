@@ -5,30 +5,31 @@ using UnityEngine;
 
 namespace Aikom.AIEngine
 {
-    [Serializable]
+    [EditorNode("Physics based search query. Saves results into a distance based stack object Stack<GameObject>")]
     public class SeekNode : LeafNode
     {
-        [ExposedVariable("Valid layers", "The layers targets can be found from")]
+        [SerializeField, Tooltip("The layers targets can be found from")]
         private LayerMask _validLayers;
 
-        [ExposedVariable("Obstruction layers", "Layers that obstruct the view of the seeker")]
+        [SerializeField, Tooltip("Layers that obstruct the view of the seeker")]
         private LayerMask _obstructionMask;
 
-        [ExposedVariable("Radius", "Radius to seek objects from")]
+        [SerializeField, Tooltip("Radius to seek objects from")]
         private float _radius;
 
-        [ExposedVariable("Max targets", "Maximum search targets per tick")]
+        [SerializeField, Tooltip("Maximum search targets per tick")]
         private int _maxTargets;
 
-        [ExposedVariable("Offset", "Offset from transforms position to use as center point")]
+        [SerializeField, Tooltip("Offset from transforms position to use as center point")]
         private Vector3 _offset;
 
-        [ExposedVariable("Local variable cache")]
+        [SerializeField, Tooltip("Local variable cache")]
         [CacheVariable(true)]
         private CacheVariable _localCacheName;
 
         private Collider[] _objectCache;
         private float[] _results;
+        private Stack _stack;
 
         public SeekNode(int id) : base(id)
         {
@@ -52,17 +53,15 @@ namespace Aikom.AIEngine
 
         protected override void OnBuild()
         {
+            _objectCache = new Collider[_maxTargets];
+            _results = new float[_maxTargets];
+            _stack = new Stack();
+            Context.SetLocalVariable(_localCacheName.Name, _stack);
         }
 
         protected override void OnInit()
         {
-            if (Context.GetLocalVariable<Collider[]>(_localCacheName.Name) == null)
-            {
-                _objectCache = new Collider[_maxTargets];
-                _results = new float[_maxTargets];
-            }
-
-            Context.SetLocalVariable(_localCacheName.Name, _objectCache);
+            _stack.Clear();
         }
 
         protected override NodeStatus Tick()
@@ -104,6 +103,14 @@ namespace Aikom.AIEngine
                 }
                 j++;
             }
+            for(int i = 0; i < _maxTargets; i++ )
+            {
+                if (_objectCache[i] != null)
+                    _stack.Push(_objectCache[i].gameObject);
+                else
+                    break;
+            }
+
             return NodeStatus.Succes;
         }
     }

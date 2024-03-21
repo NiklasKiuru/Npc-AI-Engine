@@ -8,7 +8,7 @@ namespace Aikom.AIEngine
     public class SetDestination : LeafNode
     {
         [CacheVariable(true), SerializeField]
-        [ExposedVariable("Path location", "Where to find the path end point")]
+        [Tooltip("Where to find the path end point")]
         private CacheVariable _pathLocation;
 
         private Vector3 _destination;

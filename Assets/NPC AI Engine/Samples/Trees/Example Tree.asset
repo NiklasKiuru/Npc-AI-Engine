@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f835f7f5f8e589344886db696e84521e, type: 3}
-  m_Name: New Behaviour Tree
+  m_Name: Example Tree
   m_EditorClassIdentifier: 
   _root:
     rid: 7765545317183520771
   _localVariableNames:
   - WanderPath
-  - Target
+  - TargetDestination
+  - FoundTargetsStack
+  - FoundTarget
   _nodes:
   - rid: 7765545318415073280
   - rid: 7765545318415073281
@@ -35,6 +37,12 @@ MonoBehaviour:
   - rid: 7765545424669376522
   - rid: 7765545424669376523
   - rid: 7765545424669376541
+  - rid: 7765545424669376543
+  - rid: 7765545424669376544
+  - rid: 7765545424669376546
+  - rid: 7765545424669376547
+  - rid: 7765545424669376551
+  - rid: 7765545424669376553
   references:
     version: 2
     RefIds:
@@ -48,8 +56,8 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: 922
-            y: 412
+            x: 648
+            y: 389
             width: 200
             height: 77
           _name: Root
@@ -117,9 +125,12 @@ MonoBehaviour:
         _id: 289948224
         _target: 0
         _maxDistance: 5
-        _cacheLookUp:
+        _pathDestination:
           Space: 0
           Name: WanderPath
+        _objectLocation:
+          Space: 0
+          Name: 
     - rid: 7765545318415073283
       type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
@@ -190,15 +201,27 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: -114
-            y: 756
+            x: -559
+            y: 857
             width: 200
             height: 69
-          _name: Seek
+          _name: Find Player
         _position:
-          inputId: 978879680
+          inputId: -1849103774
           outputIds: 
         _id: 1173174665
+        _validLayers:
+          serializedVersion: 2
+          m_Bits: 64
+        _obstructionMask:
+          serializedVersion: 2
+          m_Bits: 0
+        _radius: 5
+        _maxTargets: 1
+        _offset: {x: 0, y: 0, z: 0}
+        _localCacheName:
+          Space: 0
+          Name: FoundTargetsStack
     - rid: 7765545424669376514
       type: {class: Selector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
@@ -209,8 +232,8 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: 627
-            y: 508
+            x: 648
+            y: 512
             width: 200
             height: 101
           _name: Select State
@@ -228,14 +251,14 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: 120
+            x: 119
             y: 627
             width: 200
             height: 101
           _name: Chasing
         _position:
           inputId: -2102688319
-          outputIds: 8939ed45d5f7f6173b959cf8e533c38c
+          outputIds: 62eac8913b959cf8e533c38c
         _id: 978879680
     - rid: 7765545424669376516
       type: {class: FindPathNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
@@ -247,20 +270,23 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: -14
-            y: 899
+            x: -35
+            y: 912
             width: 200
             height: 69
           _name: FindPath
         _position:
-          inputId: 978879680
+          inputId: -1849103774
           outputIds: 
         _id: 402061269
-        _target: 0
-        _maxDistance: 0
-        _cacheLookUp:
+        _target: 1
+        _maxDistance: 5
+        _pathDestination:
           Space: 0
-          Name: 
+          Name: TargetDestination
+        _objectLocation:
+          Space: 0
+          Name: FoundTarget
     - rid: 7765545424669376517
       type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
@@ -271,8 +297,8 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: 150
-            y: 1006
+            x: 65
+            y: 798
             width: 200
             height: 69
           _name: SetDestination
@@ -282,7 +308,7 @@ MonoBehaviour:
         _id: -123955909
         _pathLocation:
           Space: 0
-          Name: 
+          Name: TargetDestination
     - rid: 7765545424669376518
       type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
@@ -300,7 +326,7 @@ MonoBehaviour:
           _name: RepeatUntilSucces
         _position:
           inputId: 978879680
-          outputIds: 1d8258e8
+          outputIds: a5efadf0
         _id: -1933364251
     - rid: 7765545424669376519
       type: {class: CheckDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
@@ -312,13 +338,13 @@ MonoBehaviour:
           _userComment: 
           _window:
             serializedVersion: 2
-            x: 374
-            y: 1106
+            x: 459
+            y: 1234
             width: 200
             height: 69
           _name: CheckDestination
         _position:
-          inputId: -1933364251
+          inputId: -257036379
           outputIds: 
         _id: -396852707
     - rid: 7765545424669376521
@@ -399,3 +425,135 @@ MonoBehaviour:
           inputId: -1473874482
           outputIds: 39439db8a05b0ce0
         _id: 440012393
+    - rid: 7765545424669376543
+      type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -295
+            y: 728
+            width: 200
+            height: 101
+          _name: Sequence
+        _position:
+          inputId: 978879680
+          outputIds: 8939ed45d76b1c74b963f13dd5f7f617
+        _id: -1849103774
+    - rid: 7765545424669376544
+      type: {class: PopFromStack, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -459
+            y: 972
+            width: 200
+            height: 69
+          _name: PopFromStack
+        _position:
+          inputId: -1849103774
+          outputIds: 
+        _id: 1948019671
+        _readFrom:
+          Space: 0
+          Name: FoundTargetsStack
+        _writeTo:
+          Space: 0
+          Name: FoundTarget
+    - rid: 7765545424669376546
+      type: {class: EqualsNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -195
+            y: 1165
+            width: 200
+            height: 69
+          _name: Target Is Null
+        _position:
+          inputId: 1039229881
+          outputIds: 
+        _id: 1829551233
+        _object1:
+          Space: 0
+          Name: FoundTarget
+        _object2:
+          Space: 0
+          Name: 
+    - rid: 7765545424669376547
+      type: {class: Inverter, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 1
+          _minChildren: 1
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: -195
+            y: 990
+            width: 200
+            height: 101
+          _name: Inverter
+        _position:
+          inputId: -1849103774
+          outputIds: 81bc0c6d
+        _id: 1039229881
+    - rid: 7765545424669376551
+      type: {class: EqualsNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: 0
+          _minChildren: 0
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 165
+            y: 1234
+            width: 200
+            height: 69
+          _name: Equals
+        _position:
+          inputId: -257036379
+          outputIds: 
+        _id: 1679195740
+        _object1:
+          Space: 0
+          Name: FoundTarget
+        _object2:
+          Space: 0
+          Name: 
+    - rid: 7765545424669376553
+      type: {class: Selector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
+      data:
+        _desc:
+          _description: 
+          _maxChildren: -1
+          _minChildren: 2
+          _userComment: 
+          _window:
+            serializedVersion: 2
+            x: 374
+            y: 1041
+            width: 200
+            height: 101
+          _name: Selector
+        _position:
+          inputId: -1933364251
+          outputIds: 5c7e16641d8258e8
+        _id: -257036379

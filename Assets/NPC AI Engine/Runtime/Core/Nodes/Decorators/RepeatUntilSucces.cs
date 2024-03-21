@@ -14,9 +14,9 @@ namespace Aikom.AIEngine
         }
 
         public override void OnBackPropagate(NodeStatus status, INode sender)
-        {
+        {   
             if (status != NodeStatus.Succes)
-                Tick();
+                Context.CacheNode(this);
             else
                 this.StartBackPropagation(status, Parent);
         }
@@ -28,6 +28,9 @@ namespace Aikom.AIEngine
         protected override NodeStatus Tick()
         {
             var subState = Child.Process();
+            if (subState == NodeStatus.Cached)
+                return NodeStatus.Cached;
+
             if (subState != NodeStatus.Succes)
             {
                 Context.CacheNode(this);

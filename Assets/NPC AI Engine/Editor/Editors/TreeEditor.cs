@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor.Graphs;
+using UnityEditor.Search;
 
 namespace Aikom.AIEngine.Editor
 {
@@ -20,8 +21,11 @@ namespace Aikom.AIEngine.Editor
         private TreeGraphView _graph;
         private Blackboard _localVariables;
         private BehaviourTree _cachedRuntimeTree;
+        private IMGUIContainer _inspector;
+        private VisualElement _twoPaneSplitView;
+        private SerializedObject _assetSo;
 
-        public TreeAsset Asset { get { return _asset; } }   
+        internal TreeAssetEditor CustomEditor { get; set; }
 
         [MenuItem("Window/Behaviour Tree")]
         public static void Init()
@@ -33,6 +37,11 @@ namespace Aikom.AIEngine.Editor
 
         private void CreateGUI()
         {
+            _twoPaneSplitView = new TwoPaneSplitView(0, position.xMax * 0.2f, TwoPaneSplitViewOrientation.Horizontal);
+            rootVisualElement.Add(_twoPaneSplitView);
+            _inspector = new IMGUIContainer();
+            _twoPaneSplitView.Add(_inspector);
+
             CreateGraph();
             LoadTemplates();
             CreateToolbar();
@@ -42,27 +51,36 @@ namespace Aikom.AIEngine.Editor
             if (_asset != null)
             {
                 LoadAsset(_asset);
-            }
-                
+            }  
+        }
+
+        public void OnNodeSelected(NodeBase node)
+        {
+            _inspector.Clear();
+            DestroyImmediate(CustomEditor);
+
+            CustomEditor = (TreeAssetEditor)UnityEditor.Editor.CreateEditor(_asset, typeof(TreeAssetEditor));
+            CustomEditor.SelectedId = node == null ? 0 : node.Id;
+            _inspector.Add(CustomEditor.CreateInspectorGUI());
+            _inspector.onGUIHandler = () => {
+                if (CustomEditor.target)
+                    CustomEditor.OnInspectorGUI();
+            };
         }
 
         private void OnDestroy()
         {
             EditorApplication.quitting -= SaveAsset;
-        }
-
-        private void OnInspectorUpdate()
-        {
-            if (Application.isPlaying)
-            {
-
-            }
+            DestroyImmediate(CustomEditor);
         }
 
         private void OnSelectionChange()
         {
             if (_cachedRuntimeTree != null)
+            {
                 _cachedRuntimeTree.OnTickCallback -= _graph.OnRuntimeTick;
+                _cachedRuntimeTree.OnBackpropagateCallback -= _graph.OnRuntimeBackPropagate;
+            }
             if (Application.isPlaying)
             {
                 if(Selection.activeObject != null && Selection.activeGameObject.TryGetComponent<NPCBrain>(out var brain) && brain.IsActive)
@@ -87,14 +105,14 @@ namespace Aikom.AIEngine.Editor
         private void CreateToolbar()
         {   
             var toolBar = new Toolbar();
-            rootVisualElement.Add(toolBar);
-
+   
             var localVariableToggle = new ToolbarToggle() { label = "Local Variables" };            
             _localVariables = new Blackboard(_graph) 
             { 
                 title = "Local variables",
                 subTitle = ""
             };
+            localVariableToggle.RegisterValueChangedCallback(ShowLocalVariables);
 
             _localVariables.SetPosition(new Rect(position.xMax - 210, 30, 200, 300));
             _localVariables.style.visibility = Visibility.Hidden;
@@ -120,15 +138,17 @@ namespace Aikom.AIEngine.Editor
             toolBar.Add(localVariableToggle);
             toolBar.Add(assetField);
             toolBar.Add(validateButton);
-            localVariableToggle.RegisterValueChangedCallback(ShowLocalVariables);
 
+            rootVisualElement.Insert(0,toolBar);
             void ShowLocalVariables(ChangeEvent<bool> evt)
             {
                 _localVariables.style.visibility = evt.newValue ? Visibility.Visible : Visibility.Hidden;
+                _localVariables.SetPosition(new Rect(position.xMax - 210, 30, 200, 300));
             }
 
             void OnAssetChanged(ChangeEvent<UnityEngine.Object> evt)
             {
+                //rootVisualElement.Unbind();
                 LoadAsset(evt.newValue as TreeAsset);
             }
         }
@@ -155,8 +175,15 @@ namespace Aikom.AIEngine.Editor
                     });
                     _localVariables.contentContainer.Add(textField);
                 }
+                _assetSo = new SerializedObject(asset);
+                rootVisualElement.Bind(_assetSo);
             }
-
+            else
+            {
+                DestroyImmediate(CustomEditor);
+                rootVisualElement.Unbind();
+            }
+            
             _asset = asset;            
         }
 
@@ -187,14 +214,15 @@ namespace Aikom.AIEngine.Editor
         private void CreateGraph()
         {
             _graph = new TreeGraphView(this);
-            _graph.StretchToParentSize();
-            rootVisualElement.Add(_graph);
+            _graph.style.height = position.height;
+            _graph.style.width = position.width * 0.8f;
+            _twoPaneSplitView.Add(_graph);
 
-            var nodeBlackboard = new Blackboard(_graph);
-            nodeBlackboard.title = "Node Properties";
-            nodeBlackboard.subTitle = "";
-            nodeBlackboard.SetPosition(new Rect(10, 30, 500, 300));
-            nodeBlackboard.Q<Button>("addButton").RemoveFromHierarchy();
+            //var nodeBlackboard = new Blackboard(_graph);
+            //nodeBlackboard.title = "Node Properties";
+            //nodeBlackboard.subTitle = "";
+            //nodeBlackboard.SetPosition(new Rect(10, 30, 500, 300));
+            //nodeBlackboard.Q<Button>("addButton").RemoveFromHierarchy();
             var branchTemplates = new Blackboard(_graph)
             {
                 title = "Branch Templates",
@@ -206,9 +234,9 @@ namespace Aikom.AIEngine.Editor
                 BranchPopup.Open(_branchCont, (s) => AddBranch(s, bb));
             };
 
-            _graph.NodePropertyBoard = nodeBlackboard;
+            //_graph.NodePropertyBoard = nodeBlackboard;
             _graph.Add(branchTemplates);
-            _graph.Add(nodeBlackboard);
+            //_graph.Add(nodeBlackboard);
         }
 
         // The name has to be valid before calling this

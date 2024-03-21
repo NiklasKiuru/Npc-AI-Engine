@@ -8,9 +8,9 @@ namespace Aikom.AIEngine
     [Serializable]
     public abstract class NodeBase : INode
     {
-        [SerializeField] private NodeDescriptor _desc;
-        [SerializeField] private Position _position;
-        [SerializeField] private int _id;
+        [HideInInspector][SerializeField] private NodeDescriptor _desc;
+        [HideInInspector][SerializeField] private Position _position;
+        [ReadOnly][SerializeField][Tooltip("Context ID of this node")] private int _id;
         private IParent _parent;
         private BehaviourTree _ctx;
         private NodeStatus _status;

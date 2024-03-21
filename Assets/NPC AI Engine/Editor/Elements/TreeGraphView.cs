@@ -16,7 +16,7 @@ namespace Aikom.AIEngine.Editor
         private TreeEditor _editorWindow;
         private CachedEdgeEvent _delayedConnection;
         private TreeAsset _treeAsset;
-        private BTNode _selectedNode;
+        //private BTNode _selectedNode;
 
         public Blackboard NodePropertyBoard { get; set; }
 
@@ -95,7 +95,7 @@ namespace Aikom.AIEngine.Editor
                     }
                     var targetColor = new Color(color.r, color.g, color.b, 0);
                     nodeElement.experimental.animation.Start(
-                        color, targetColor, 1000,
+                        color, targetColor, 250,
                         (v, c) => border.style.borderBottomColor = c);
                 }
             }
@@ -112,7 +112,7 @@ namespace Aikom.AIEngine.Editor
                     var c = Color.yellow;
                     var target = new Color(c.r, c.g, c.b, 0);
                     nodeElement.experimental.animation.Start(
-                        c, target, 1000,
+                        c, target, 250,
                         (v, c) => border.style.borderTopColor = c);
                 }
             }
@@ -227,34 +227,47 @@ namespace Aikom.AIEngine.Editor
 
         public void ShowNodeProperties(BTNode node)
         {   
-            _selectedNode = node;
-            NodePropertyBoard.Clear();
+            //_selectedNode = node;
+            //NodePropertyBoard.Clear();
             if (node == null)
+            {
+                _editorWindow.OnNodeSelected(null);
                 return;
-
-            var baseNode = node.Base;
-            var desc = baseNode.Descriptor;
-            var nameField = new TextField("Name") { value = desc.DisplayName };
-            nameField.RegisterValueChangedCallback((v) => _selectedNode.SetName(v.newValue));
-            NodePropertyBoard.title = NodeDescriptor.GetDefaultPrettyName(baseNode);
-            NodePropertyBoard.contentContainer.Add(nameField);
-            NodePropertyBoard.subTitle = desc.Description;
-            var fields = FieldSerializationUtility.GetPropertyElements(baseNode, _treeAsset);
-            foreach ( var field in fields)
-            {
-                if (field != null)
-                    NodePropertyBoard.contentContainer.Add(field);
             }
-
-            if(baseNode is Root)
+            else   
             {
-                var childCountElement = new TextField("Total child count") { value = _treeAsset.Count.ToString() };
-                childCountElement.SetEnabled(false);
-                var depthElement = new IntegerField("Total valid depth") { value = _treeAsset.GetDepth() };
-                depthElement.SetEnabled(false);
-                NodePropertyBoard.contentContainer.Add(childCountElement);
-                NodePropertyBoard.contentContainer.Add(depthElement);
+                _editorWindow.OnNodeSelected(node.Base);
+                return;
             }
+                
+
+            //var baseNode = node.Base;
+            //var desc = baseNode.Descriptor;
+            //var nameField = new TextField("Name") { value = desc.DisplayName };
+            //nameField.RegisterValueChangedCallback((v) => _selectedNode.SetName(v.newValue));
+            //NodePropertyBoard.title = NodeDescriptor.GetDefaultPrettyName(baseNode) + " || Debug Id: " + baseNode.Id;
+            //NodePropertyBoard.contentContainer.Add(nameField);
+            //NodePropertyBoard.subTitle = desc.Description;
+            //var fields = FieldSerializationUtility.GetPropertyElements(baseNode, _treeAsset);
+            //foreach ( var field in fields)
+            //{
+            //    if (field != null)
+            //        NodePropertyBoard.contentContainer.Add(field);
+            //}
+
+            //if(baseNode is Root)
+            //{
+            //    var childCountElement = new TextField("Total child count") { value = _treeAsset.Count.ToString() };
+            //    childCountElement.SetEnabled(false);
+            //    var depthElement = new IntegerField("Total valid depth") { value = _treeAsset.GetDepth() };
+            //    depthElement.SetEnabled(false);
+            //    NodePropertyBoard.contentContainer.Add(childCountElement);
+            //    NodePropertyBoard.contentContainer.Add(depthElement);
+            //}
+
+            //if(customEditor != null)
+            //    UnityEngine.Object.DestroyImmediate(customEditor);
+            //_editorWindow.CustomEditor = UnityEditor.Editor.CreateEditor(_treeAsset);
         }
 
         /// <summary>
@@ -322,9 +335,11 @@ namespace Aikom.AIEngine.Editor
         private BTNode CreateRoot(Root root)
         {
             var desc = root.Descriptor;
-            var node = CreateDisplayNode(root, new Rect(new Vector2(_editorWindow.position.xMax /2, _editorWindow.position.yMax / 2), desc.DefaultWindowSize), "Root");
+            if (root.Descriptor.Position == Rect.zero)
+                root.SetWindowPosition(new Rect(new Vector2(_editorWindow.position.xMax / 2, 
+                    _editorWindow.position.yMax / 2), desc.DefaultWindowSize));
+            var node = CreateDisplayNode(root, root.Descriptor.Position, "Root");
             node.capabilities &= ~Capabilities.Deletable;
-            node.capabilities &= ~Capabilities.Movable;
             return node;
         }
     }

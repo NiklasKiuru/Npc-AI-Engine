@@ -6,26 +6,19 @@ namespace Aikom.AIEngine
     [CreateAssetMenu(fileName = "New Behaviour Tree", menuName = "Behaviour Tree/Tree")]
     public class TreeAsset : ScriptableObject
     {
-        [ReadOnly][SerializeReference] Root _root;
-        [ReadOnly][SerializeField] List<string> _localVariableNames = new List<string>();
+        [SerializeReference] Root _root;
+        [SerializeField] List<string> _localVariableNames = new List<string>();
 
-        [ReadOnly][SerializeReference] private List<NodeBase> _nodes = new();
+        [SerializeReference] private List<NodeBase> _nodes = new();
 
         public Root Root
         {
             get
             {
                 if (_root == null)
-                {
-                    _root = new Root(-1);
-//                    _root = CreateInstance<Root>();
-//#if UNITY_EDITOR
-//                    AssetDatabase.AddObjectToAsset(_root, this);
-//                    EditorUtility.SetDirty(this);
-//                    AssetDatabase.SaveAssets();
-//#endif            
+                { 
+                    _root = new Root(-1); 
                 }
-                    
                 return _root;
             }
         }
@@ -67,6 +60,16 @@ namespace Aikom.AIEngine
                     return _nodes[i];
             }
             return null;
+        }
+
+        public int IndexOf(int id)
+        {
+            for(int i = 0; i < _nodes.Count; i++)
+            {
+                if(_nodes[i].Id == id) 
+                    return i;
+            }
+            return -1;
         }
 
         /// <summary>

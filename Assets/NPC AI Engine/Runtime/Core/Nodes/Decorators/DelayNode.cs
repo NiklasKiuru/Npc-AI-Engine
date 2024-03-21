@@ -7,7 +7,7 @@ namespace Aikom.AIEngine
     [EditorNode("Delayes the execution of its child by defined time limit in seconds")]
     public class DelayNode : DecoratorNode
     {
-        [SerializeField, ExposedVariable("Waiting delay")] private float _delay;
+        [SerializeField] private float _delay;
 
         private float _elapsedTime;
 

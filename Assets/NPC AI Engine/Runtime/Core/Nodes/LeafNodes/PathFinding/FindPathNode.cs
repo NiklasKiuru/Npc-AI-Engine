@@ -3,6 +3,7 @@ using UnityEngine.AI;
 
 namespace Aikom.AIEngine
 {
+    [EditorNode("Finds a path using unitys NavMeshAgent")]
     public class FindPathNode : LeafNode
     {   
         public enum PathTarget
@@ -16,17 +17,22 @@ namespace Aikom.AIEngine
         private Vector3 _destination;
 
         [SerializeField]
-        [ExposedVariable("Target type", "The way the path end point is determined")]
+        [Tooltip("The way the path end point is determined")]
         private PathTarget _target;
 
         [SerializeField]
-        [ExposedVariable("Max distance", "Maximum distance to look for random positions")]
+        [Tooltip("Maximum distance to look for random positions")]
         private float _maxDistance;
 
         [SerializeField]
         [CacheVariable(true)]
-        [ExposedVariable("Local variable cache", "Key to find cached target object")]
-        private CacheVariable _cacheLookUp;
+        [Tooltip("Key to set destination")]
+        private CacheVariable _pathDestination;
+
+        [SerializeField]
+        [CacheVariable(true)]
+        [Tooltip("Key to find object if target type is set to Object")]
+        private CacheVariable _objectLocation;
 
         private bool _hasPath;
 
@@ -36,6 +42,7 @@ namespace Aikom.AIEngine
         protected override void OnBuild()
         {
             _agent = Context.Target.GetComponent<NavMeshAgent>();
+            _path = new NavMeshPath();
         }
 
         protected override void OnInit()
@@ -45,13 +52,12 @@ namespace Aikom.AIEngine
                 _destination = Context.Target.transform.position.RandomWithinDistance(_maxDistance);
             else
             {
-                var obj = Context.GetLocalVariable<GameObject>(_cacheLookUp.Name);
+                var obj = Context.GetLocalVariable<GameObject>(_objectLocation.Name);
                 if(obj != null)
                     _destination = obj.transform.position;
             }    
-            
             NavMesh.SamplePosition(_destination, out var hit, _maxDistance, -1);
-            _path = new NavMeshPath();
+            
             if (!hit.hit)
                 _hasPath = false;
             else
@@ -64,7 +70,7 @@ namespace Aikom.AIEngine
                 return NodeStatus.Failure;
             if (_hasPath)
             {
-                Context.SetLocalVariable(_cacheLookUp.Name, _destination);
+                Context.SetLocalVariable(_pathDestination.Name, _destination);
                 return NodeStatus.Succes;
             }
                 
@@ -76,7 +82,8 @@ namespace Aikom.AIEngine
             var newNode = new FindPathNode(Id, Position);
             newNode._target = _target;
             newNode._maxDistance = _maxDistance;
-            newNode._cacheLookUp = _cacheLookUp;
+            newNode._pathDestination = _pathDestination;
+            newNode._objectLocation = _objectLocation;
             return newNode;
         }
     }

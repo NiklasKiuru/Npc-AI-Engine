@@ -1,12 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 namespace Aikom.AIEngine
 {
     [EditorNode("Logs the message to the console and returns succes")]
     public class DebugNode : LeafNode
     {
-        [SerializeField, ExposedVariable("Message")] 
+        [SerializeField] 
         private string _message;
 
         public DebugNode(int id) : base(id)

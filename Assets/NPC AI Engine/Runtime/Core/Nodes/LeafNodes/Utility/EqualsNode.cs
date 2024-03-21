@@ -3,19 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Aikom.AIEngine
 {
+    [EditorNode("Checks if the two objects are equal. To null check just leave the field as blank")]
     public class EqualsNode : LeafNode
     {
-        [ExposedVariable("Object 1 location")]
-        private CacheSpace _space1;
+        [Tooltip("Object 1 location"), SerializeField, CacheVariable]
+        private CacheVariable _object1;
 
-        [ExposedVariable("Object 1")]
-        private string _cacheRead1;
-
-        [ExposedVariable("Object 1 location")]
-        private CacheSpace _space2;
-
-        [ExposedVariable("Object 2")]
-        private string _cacheRead2;
+        [Tooltip("Object 1 location"), SerializeField, CacheVariable]
+        private CacheVariable _object2;
 
         public EqualsNode(int id) : base(id) { }
         protected EqualsNode(int id, Position pos) : base(id, pos) { }
@@ -23,10 +18,8 @@ namespace Aikom.AIEngine
         public override INode Clone()
         {
             var newNode = new EqualsNode(Id, Position);
-            newNode._space1 = _space1;
-            newNode._space2 = _space2;
-            newNode._cacheRead1 = _cacheRead1;
-            newNode._cacheRead2 = _cacheRead2;
+            newNode._object1 = _object1;
+            newNode._object2 = _object2;
             return newNode;
         }
 
@@ -40,8 +33,8 @@ namespace Aikom.AIEngine
 
         protected override NodeStatus Tick()
         {
-            var val1 = Read(_space1, _cacheRead1);
-            var val2 = Read(_space2, _cacheRead2);
+            var val1 = Read(_object1.Space, _object1.Name);
+            var val2 = Read(_object2.Space, _object2.Name);
 
             if (val1 != val2)
                 return NodeStatus.Failure;

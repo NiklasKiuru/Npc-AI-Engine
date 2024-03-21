@@ -1,17 +1,18 @@
 using System;
 using Object = UnityEngine.Object;
+using UnityEngine;
 
 namespace Aikom.AIEngine
 {
     public class FindNode : LeafNode
     {
-        [ExposedVariable("Find all", "Should the search be done for the entire hierarchy?")]
+        [SerializeField]
         private bool _findAll;
 
-        [ExposedVariable("Unity object type", "Must derive from MonoBehaviour and have an attribute Discoverable")]
+        [SerializeField]
         private Type _type;
 
-        [ExposedVariable("Local variable cache")]
+        [SerializeField]
         private string _localVariable;
 
         public FindNode(int id) : base(id)
