@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Aikom.AIEngine
 {
-    public interface INode
+    public interface INode : IContextIndexable
     {   
         /// <summary>
         /// Processes the node and all its subnodes
@@ -21,11 +21,6 @@ namespace Aikom.AIEngine
         /// Information used in editor
         /// </summary>
         NodeDescriptor Descriptor { get; }
-
-        /// <summary>
-        /// Custom unique id of this node
-        /// </summary>
-        int Id { get; }
 
         /// <summary>
         /// Parent of this node

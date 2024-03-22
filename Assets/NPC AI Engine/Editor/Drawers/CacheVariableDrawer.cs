@@ -1,7 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Aikom.AIEngine.Editor
 {
     [CustomPropertyDrawer(typeof(CacheVariable))]
@@ -18,10 +20,43 @@ namespace Aikom.AIEngine.Editor
             if(treeAsset != null)
             {   
                 EditorGUILayout.BeginHorizontal();
+                bool disableSpaceEditing = false;
+
                 var space = property.FindPropertyRelative("Space");
                 var name = property.FindPropertyRelative("Name");
-                var enumVal = EditorGUILayout.EnumPopup((CacheSpace)space.enumValueIndex, GUILayout.Width(100));
-                space.enumValueIndex = (int)(CacheSpace)enumVal;
+                CacheSpace lockedSpace = (CacheSpace)space.enumValueIndex;
+
+                // This is a little bit hacky but its somewhat difficult to find an element from an array
+                var listField = treeAsset.GetType().GetField("_nodes", BindingFlags.Instance | BindingFlags.NonPublic);
+                if(int.TryParse(property.propertyPath.Split('[', ']')[1], out var nodeIndex))
+                {
+                    var list = (List<NodeBase>)listField.GetValue(treeAsset);
+                    var node = list[nodeIndex];
+
+                    var fields = node.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+                    CacheVariableAttribute attr = null;
+                    foreach( var field in fields )
+                    {
+                        attr = field.GetCustomAttribute<CacheVariableAttribute>(false);
+                        if (attr != null && field.Name.Equals(property.name))
+                            break;
+                    }
+                    if(attr != null )
+                    {
+                        if(attr.RestrictSelection)
+                        {
+                            disableSpaceEditing = true;
+                            lockedSpace = attr.Space;
+                        }
+                    }
+                    
+                }
+
+                using (new EditorGUI.DisabledScope(disableSpaceEditing))
+                {
+                    var enumVal = EditorGUILayout.EnumPopup(lockedSpace, GUILayout.Width(100));
+                    space.enumValueIndex = (int)(CacheSpace)enumVal;
+                }
 
                 var index = treeAsset.LocalVariables.IndexOf(name.stringValue);
                 var selection = EditorGUILayout.Popup(index, treeAsset.LocalVariables.ToArray());

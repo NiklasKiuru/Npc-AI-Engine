@@ -46,7 +46,7 @@ namespace Aikom.AIEngine
         public NodeBase(int id)
         {
             _id = id;
-            _position = new Position() { inputId = 0, outputIds = new() };
+            _position = new Position() { outputIds = new() };
         }
 
         protected NodeBase(int id, Position position)

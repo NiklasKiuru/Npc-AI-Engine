@@ -5,6 +5,7 @@ using UnityEditor;
 using static UnityEditor.Progress;
 using UnityEngine.UIElements;
 using System.Reflection;
+using System;
 
 namespace Aikom.AIEngine.Editor
 {
@@ -47,14 +48,14 @@ namespace Aikom.AIEngine.Editor
                 EditorGUI.indentLevel++;
                 GUI.enabled = false;
                 EditorGUILayout.TextArea(attr.Description, new GUIStyle(EditorStyles.textArea) { wordWrap = true });
-                // Draw base scriptfield
-                MonoScript script = null;
-                EditorGUILayout.ObjectField(script, typeof(TreeAsset), false);
+
+                // Draw base scriptfield. For cs files in packages this should return null so we ignore it
+                MonoScript script = FindScriptAsset(node.GetType());
+                if(script != null) 
+                    EditorGUILayout.ObjectField(script, node.GetType(), false);
                 GUI.enabled = true;
                 EditorGUI.indentLevel--;
             }
-
-           
 
             // Draw the selected node
             EditorGUILayout.PropertyField(prop, new GUIContent(NodeDescriptor.GetDefaultPrettyName(node)), true);
@@ -108,6 +109,17 @@ namespace Aikom.AIEngine.Editor
             r.x -= 2;
             r.width += 6;
             EditorGUI.DrawRect(r, color);
+        }
+
+        private MonoScript FindScriptAsset(Type type)
+        {   
+            var name = type.Name + ".cs";
+            foreach(var path in AssetDatabase.GetAllAssetPaths())
+            {
+                if(path.EndsWith(name))
+                    return AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+            }
+            return null;
         }
     }
 
