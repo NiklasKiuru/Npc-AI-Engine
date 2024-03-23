@@ -7,11 +7,12 @@ using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEditor.Graphs;
-using UnityEditor.Search;
 
 namespace Aikom.AIEngine.Editor
-{
+{   
+    /// <summary>
+    /// Main editor window that holds the graph for node editing
+    /// </summary>
     [Serializable]
     public class TreeEditor : EditorWindow
     {
@@ -35,6 +36,7 @@ namespace Aikom.AIEngine.Editor
             window.Show();
         }
 
+        #region Engine callbacks
         private void CreateGUI()
         {
             _twoPaneSplitView = new TwoPaneSplitView(0, position.xMax * 0.2f, TwoPaneSplitViewOrientation.Horizontal);
@@ -52,20 +54,6 @@ namespace Aikom.AIEngine.Editor
             {
                 LoadAsset(_asset);
             }  
-        }
-
-        public void OnNodeSelected(NodeBase node)
-        {
-            _inspector.Clear();
-            DestroyImmediate(CustomEditor);
-
-            CustomEditor = (TreeAssetEditor)UnityEditor.Editor.CreateEditor(_asset, typeof(TreeAssetEditor));
-            CustomEditor.SelectedId = node == null ? 0 : node.Id;
-            _inspector.Add(CustomEditor.CreateInspectorGUI());
-            _inspector.onGUIHandler = () => {
-                if (CustomEditor.target)
-                    CustomEditor.OnInspectorGUI();
-            };
         }
 
         private void OnDestroy()
@@ -102,6 +90,33 @@ namespace Aikom.AIEngine.Editor
             }
         }
 
+        private void OnDisable()
+        {
+            SaveAsset();
+        }
+#endregion
+
+        /// <summary>
+        /// Called by the graph when a node is selected in it
+        /// </summary>
+        /// <param name="node"></param>
+        internal void OnNodeSelected(NodeBase node)
+        {
+            _inspector.Clear();
+            DestroyImmediate(CustomEditor);
+
+            CustomEditor = (TreeAssetEditor)UnityEditor.Editor.CreateEditor(_asset, typeof(TreeAssetEditor));
+            CustomEditor.SelectedId = node == null ? 0 : node.Id;
+            _inspector.Add(CustomEditor.CreateInspectorGUI());
+            _inspector.onGUIHandler = () => {
+                if (CustomEditor.target)
+                    CustomEditor.OnInspectorGUI();
+            };
+        }
+
+        /// <summary>
+        /// Creates the top toolbar
+        /// </summary>
         private void CreateToolbar()
         {   
             var toolBar = new Toolbar();
@@ -153,6 +168,10 @@ namespace Aikom.AIEngine.Editor
             }
         }
 
+        /// <summary>
+        /// Loads a new tree asset
+        /// </summary>
+        /// <param name="asset"></param>
         private void LoadAsset(TreeAsset asset)
         {   
             // Save old
@@ -187,6 +206,10 @@ namespace Aikom.AIEngine.Editor
             _asset = asset;            
         }
 
+        /// <summary>
+        /// Adds a new local variable definition to the tree
+        /// </summary>
+        /// <param name="bb"></param>
         private void AddLocalVariable(Blackboard bb)
         {
             if(_asset != null)
@@ -202,6 +225,10 @@ namespace Aikom.AIEngine.Editor
             }
         }
 
+        /// <summary>
+        /// Removes a local variable definition from the tree
+        /// </summary>
+        /// <param name="bb"></param>
         private void RemoveLocalVariable(Blackboard bb)
         {
             if(_asset != null && _asset.LocalVariables.Count != 0)
@@ -211,6 +238,9 @@ namespace Aikom.AIEngine.Editor
             }
         }
 
+        /// <summary>
+        /// Creates the graph window
+        /// </summary>
         private void CreateGraph()
         {
             _graph = new TreeGraphView(this);
@@ -239,7 +269,11 @@ namespace Aikom.AIEngine.Editor
             //_graph.Add(nodeBlackboard);
         }
 
-        // The name has to be valid before calling this
+        /// <summary>
+        /// Adds a new branch to the branch container. The name must be valid before calling this
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="board"></param>
         private void AddBranch(string name, Blackboard board)
         {   
             var validNodes = new List<NodeBase>();
@@ -280,6 +314,10 @@ namespace Aikom.AIEngine.Editor
                 Debug.LogWarning("Selection must contain atleast 2 valid nodes excluding root");
         }
 
+        /// <summary>
+        /// Loads branch templates from disc
+        /// </summary>
+        /// <exception cref="System.Exception"></exception>
         private void LoadTemplates()
         {   
             // Should find it from packages as well
@@ -302,6 +340,9 @@ namespace Aikom.AIEngine.Editor
             _branchCont = cont;
         }
 
+        /// <summary>
+        /// Saves the asset
+        /// </summary>
         private void SaveAsset()
         {
             if (_asset != null)
@@ -312,11 +353,6 @@ namespace Aikom.AIEngine.Editor
                 AssetDatabase.SaveAssetIfDirty(_asset);
                 AssetDatabase.Refresh();
             }
-        }
-
-        private void OnDisable()
-        {
-            SaveAsset();
         }
     }
 }

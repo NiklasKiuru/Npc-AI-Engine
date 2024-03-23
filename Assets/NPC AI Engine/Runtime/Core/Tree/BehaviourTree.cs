@@ -17,15 +17,37 @@ namespace Aikom.AIEngine
         private Switch<List<IParent>> _switch;
         private IExecutionContext _executor;
 
+        /// <summary>
+        /// The gameobject this tree is attached to
+        /// </summary>
         public GameObject Target { get { return _target; } }
 
         internal event Action<INode, NodeStatus> OnTick;
         internal event Action<INode> OnInitialize;
 
+        /// <summary>
+        /// Called when any node tick has happened
+        /// </summary>
         public Action<INode, NodeStatus> OnTickCallback { get { return OnTick; } set { OnTick = value; } }
+
+        /// <summary>
+        /// Called when any node has been initialized on its process cycle
+        /// </summary>
         public Action<INode> OnInitializeCallback { get { return OnInitialize; } }
+
+        /// <summary>
+        /// Called when a node back propagates
+        /// </summary>
         public Action<INode, IParent> OnBackpropagateCallback { get; set; }
+
+        /// <summary>
+        /// Is this tree actively processing nodes?
+        /// </summary>
         public bool IsActive { get { return _active; } }
+
+        /// <summary>
+        /// The time interval used in executor
+        /// </summary>
         public float DeltaTime { get { return _executor.TickDelay; } }
 
         /// <summary>
@@ -70,11 +92,13 @@ namespace Aikom.AIEngine
                 node.Value.Build(this);
             foreach(var node in _nodes)
             {
-                if (!(node.Value as NodeBase).IsValid())
+                if (!(node.Value as NodeBase).IsValid(out string message))
                 {
                     _active = false;
-                    Debug.LogError("Process node: " + node.Value.GetType().Name + " failed to validate. Disabling brain component");
-                    break;
+                    Debug.LogError($"Process node: { node.Value.GetType().Name } failed to validate. " +
+                        $"Debug id: {node.Value.Id}" +
+                        $"Error: {message}" +
+                        $"GameObject: {Target}");
                 }  
             }
         }
@@ -87,9 +111,15 @@ namespace Aikom.AIEngine
         internal void OnTickNotify(INode node, NodeStatus status) 
             => OnTickCallback?.Invoke(node, status);
 
+        /// <summary>
+        /// Notifies listeners when back propagation occures
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="reciever"></param>
         internal void OnBackpropagateNotify(INode sender, IParent reciever) 
             => OnBackpropagateCallback?.Invoke(sender, reciever);
 
+        // **NOTE** This should propably be public
         /// <summary>
         /// Processes all active branches of the tree
         /// </summary>
@@ -127,7 +157,6 @@ namespace Aikom.AIEngine
         internal void Stop()
         {   
             _active = false;
-            Debug.Log("Stopped tree execution");
         }
 
         /// <summary>
@@ -138,9 +167,28 @@ namespace Aikom.AIEngine
         {
             node.IsCached = true;
             _switch.GetInActive().Add(node);
+#if UNITY_EDITOR
+            var inActiveList = _switch.GetInActive();
+            if(inActiveList.Count > _nodes.Count && _active)
+            {
+                _active = false;
+                var dic = new Dictionary<IParent, int>();
+                Debug.LogError("Cache overload detected. Shutting down processing.");
+                for(int i = 0; i < inActiveList.Count; i++)
+                {
+                    if (!dic.TryAdd(inActiveList[i], 1))
+                    {
+                        dic[inActiveList[i]] += 1;
+                    }
+                }
+                foreach(var kvp in dic)
+                {
+                    Debug.LogWarning($"Node: {kvp.Key.GetType()}, cache count: {kvp.Value}");
+                }
+            }
+#endif
         }
         
-
         /// <summary>
         /// Gets a local shared variable
         /// </summary>
@@ -172,6 +220,11 @@ namespace Aikom.AIEngine
             return default;
         }
 
+        /// <summary>
+        /// Gets a local variable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public object GetLocalVariable(string name)
         {
             if(_localVariables.TryGetValue(name, out var obj))
@@ -179,12 +232,23 @@ namespace Aikom.AIEngine
             return default;
         }
 
+        /// <summary>
+        /// Sets a local variable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
         public void SetLocalVariable(string name, object value)
         {
             if (_localVariables.ContainsKey(name))
                 _localVariables[name] = value;
         }
 
+        /// <summary>
+        /// Gets a global variable
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public object GetGlobalVariable(string name)
         {
             throw new NotImplementedException();

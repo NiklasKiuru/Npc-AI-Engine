@@ -93,8 +93,9 @@ namespace Aikom.AIEngine
                     
             }   
         }
-        public override bool IsValid()
+        public override bool IsValid(out string message)
         {
+            message = "Not enough valid children detected";
             return ChildCount >= 2;
         }
 

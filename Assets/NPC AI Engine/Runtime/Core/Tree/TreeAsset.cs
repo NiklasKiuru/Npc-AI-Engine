@@ -2,15 +2,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Aikom.AIEngine
-{
+{   
+    /// <summary>
+    /// Saveable asset that represents a behaviour tree
+    /// </summary>
     [CreateAssetMenu(fileName = "New Behaviour Tree", menuName = "Behaviour Tree/Tree")]
     public class TreeAsset : ScriptableObject
     {
         [SerializeReference] Root _root;
         [SerializeField] List<string> _localVariableNames = new List<string>();
-
         [SerializeReference] private List<NodeBase> _nodes = new();
 
+        /// <summary>
+        /// Root node of the tree
+        /// </summary>
         public Root Root
         {
             get
@@ -23,12 +28,24 @@ namespace Aikom.AIEngine
             }
         }
 
+        /// <summary>
+        /// Gets the node by position index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public NodeBase this[int index]
         {
             get { return _nodes[index]; }
         } 
 
+        /// <summary>
+        /// Used local variable names in this tree
+        /// </summary>
         public List<string> LocalVariables => _localVariableNames;
+
+        /// <summary>
+        /// Number of nodes in this asset. This includes all nodes created in the asset, not just the ones that build the actual tree
+        /// </summary>
         public int Count => _nodes.Count;
 
         /// <summary>
@@ -50,6 +67,11 @@ namespace Aikom.AIEngine
             _nodes.Add(node);
         }
 
+        /// <summary>
+        /// Gets a node from this asset by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public NodeBase GetNode(int id)
         {
             if (id == -1)
@@ -62,6 +84,11 @@ namespace Aikom.AIEngine
             return null;
         }
 
+        /// <summary>
+        /// Returns the index of the node by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public int IndexOf(int id)
         {
             for(int i = 0; i < _nodes.Count; i++)

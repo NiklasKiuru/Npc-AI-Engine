@@ -1,11 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using System.Reflection;
 
 namespace Aikom.AIEngine.Editor
-{
+{   
+    // **NOTE** This might not even have to exist
+
+    /// <summary>
+    /// Custom drawer for nodes
+    /// </summary>
     [CustomPropertyDrawer(typeof(EditorNodeAttribute))]
     public class NodeDrawer : PropertyDrawer
     {

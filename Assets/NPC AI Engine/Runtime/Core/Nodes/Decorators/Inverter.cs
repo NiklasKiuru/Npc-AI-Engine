@@ -29,11 +29,6 @@ namespace Aikom.AIEngine
             return status;
         }
 
-        public override bool IsValid()
-        {
-            return Child != null;
-        }
-
         protected override void OnBuild()
         {
         }

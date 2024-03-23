@@ -1,20 +1,19 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Aikom.AIEngine.Editor
-{
+{   
+    /// <summary>
+    /// Visual element representing a behaviour node
+    /// </summary>
     public class BTNode : Node
     {
         private static readonly Color _validColor = new Color(0, 1, 0.2f, 0.50f);
         private static readonly Color _invalidColor = new Color(1, 0, 0, 0.50f);
 
-        //private NodeDescriptor _descriptor;
         private NodeBase _base;
         private TreeGraphView _view;
         private bool _hasValidConnections;
@@ -112,9 +111,44 @@ namespace Aikom.AIEngine.Editor
             RefreshAndDontExpand();
         }
 
+        #region Connection callback methods
+
+        /// <summary>
+        /// Unlinks the OnConnect and OnDisconnect calls
+        /// </summary>
+        internal void UnLink()
+        {
+            foreach (var port in outputContainer.Children())
+            {
+                if (port is BTPort btPort)
+                {
+                    btPort.OnConnect -= SetAsChild;
+                    btPort.OnDisconnect -= VoidChild;
+                }
+            }
+            if (!IsRoot)
+            {
+                var port = inputContainer.Children().First() as BTPort;
+                port.OnConnect -= SetParentOnConnect;
+                port.OnDisconnect -= VoidParent;
+            }
+
+        }
+
         private void VoidParent(Port port) => SetParentForBase(null);
         private void SetParentOnConnect(Port port) => SetParentForBase((port.connections.First().output.node as BTNode).Base as IParent);
         private void SetParentForBase(IParent node) => _base.SetParent(node);
+        private void SetAsChild(Port port) => SetChild(port, (port.connections.First().input.node as BTNode).Base);
+        private void VoidChild(Port port) => SetChild(port, null);
+        private void SetChild(Port port, NodeBase node)
+        {
+            var index = GetPortIndex(port, outputContainer);
+            if (index < 0)
+                return;
+            (_base as IParent).SetChild(index, node);
+            Debug.Log("Connected parent: " + _base.GetType().ToString() + " to: " + node?.GetType().ToString());
+        }
+        #endregion
 
         /// <summary>
         /// Refreshes ports, connection status and styles without overriding current styles with expanded ones
@@ -141,7 +175,12 @@ namespace Aikom.AIEngine.Editor
             _hasValidConnections = inputStatus && outputStatus;
             OnValidate?.Invoke(this);
         }
-
+        
+        /// <summary>
+        /// Updates validity of either input or output ports
+        /// </summary>
+        /// <param name="cont"></param>
+        /// <returns></returns>
         private bool UpdateValidity(VisualElement cont)
         {
             // Check port status'
@@ -158,6 +197,10 @@ namespace Aikom.AIEngine.Editor
             return status;
         }
 
+        /// <summary>
+        /// Creates a new child port
+        /// </summary>
+        /// <returns></returns>
         private BTPort CreateChild()
         {
             var child = CreatePort(string.Concat(""), outputContainer, Direction.Output);
@@ -167,17 +210,14 @@ namespace Aikom.AIEngine.Editor
             return child;
         }
 
-        private void SetAsChild(Port port) => SetChild(port, (port.connections.First().input.node as BTNode).Base);
-        private void VoidChild(Port port) => SetChild(port, null);
-        private void SetChild(Port port, NodeBase node)
-        {
-            var index = GetPortIndex(port, outputContainer);
-            if (index < 0)
-                return;
-            (_base as IParent).SetChild(index, node);
-            Debug.Log("Connected parent: " + _base.GetType().ToString() + " to: " + node?.GetType().ToString());
-        }
+        
 
+        /// <summary>
+        /// Gets the port index
+        /// </summary>
+        /// <param name="port"></param>
+        /// <param name="cont"></param>
+        /// <returns></returns>
         private int GetPortIndex(Port port, VisualElement cont)
         {
             var index = 0;
@@ -190,7 +230,13 @@ namespace Aikom.AIEngine.Editor
             return -1;
         }
 
-
+        /// <summary>
+        /// Creates a new port
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="container"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
         private BTPort CreatePort(string name, VisualElement container, Direction dir)
         {
             BTPort port = BTPort.Create<Edge>(Orientation.Vertical, dir, Port.Capacity.Single, typeof(NodeStatus));
@@ -202,6 +248,9 @@ namespace Aikom.AIEngine.Editor
             return port;
         }
 
+        /// <summary>
+        /// Called by the "Add child button"
+        /// </summary>
         private void AddChildOption() 
         { 
             if(outputContainer.childCount < Base.Descriptor.MaxChildren || Base.Descriptor.MaxChildren < 0)
@@ -212,6 +261,9 @@ namespace Aikom.AIEngine.Editor
             }
         }
 
+        /// <summary>
+        /// Called by the "Remove child button"
+        /// </summary>
         private void RemoveChildOption()
         {
             if(outputContainer.childCount > Base.Descriptor.MinChildren)
@@ -270,32 +322,13 @@ namespace Aikom.AIEngine.Editor
         }
 
         /// <summary>
-        /// Unlinks the OnConnect and OnDisconnect calls
+        /// Sets the position of this element
         /// </summary>
-        internal void UnLink()
-        {
-            foreach(var port in outputContainer.Children())
-            {
-                if(port is BTPort btPort)
-                {
-                    btPort.OnConnect -= SetAsChild;
-                    btPort.OnDisconnect -= VoidChild;
-                }
-            }
-            if (!IsRoot)
-            {
-                var port = inputContainer.Children().First() as BTPort;
-                port.OnConnect -= SetParentOnConnect;
-                port.OnDisconnect -= VoidParent;
-            }
-                
-        }
-
+        /// <param name="newPos"></param>
         public override void SetPosition(Rect newPos)
         {
             base.SetPosition(newPos);
             Base.SetWindowPosition(newPos);
         }
     }
-
 }

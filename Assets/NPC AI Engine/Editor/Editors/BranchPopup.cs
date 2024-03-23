@@ -4,12 +4,20 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Aikom.AIEngine.Editor
-{
+{   
+    /// <summary>
+    /// Popup window for adding a new branch to branch templates
+    /// </summary>
     public class BranchPopup : EditorWindow
     {
         private static BranchContainer s_container;
         private static Action<string> s_onCreateEntryCb;
 
+        /// <summary>
+        /// Opens the window
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="onCreateEntrycallBack"></param>
         internal static void Open(BranchContainer container, Action<string> onCreateEntrycallBack)
         {
             s_container = container;

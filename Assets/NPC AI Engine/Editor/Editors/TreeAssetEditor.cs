@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using static UnityEditor.Progress;
 using UnityEngine.UIElements;
 using System.Reflection;
 using System;
 
 namespace Aikom.AIEngine.Editor
-{
+{   
+    /// <summary>
+    /// Editor for tree assets
+    /// </summary>
     [CustomEditor(typeof(TreeAsset))]
     public class TreeAssetEditor : UnityEditor.Editor
     {
-        private SerializedProperty _localVariables;
         private SerializedProperty _nodes;
         private SerializedProperty _root;
 
@@ -23,11 +22,13 @@ namespace Aikom.AIEngine.Editor
 
         private void OnEnable()
         {
-            _localVariables = serializedObject.FindProperty("_localVariableNames");
             _nodes = serializedObject.FindProperty("_nodes");
             _root = serializedObject.FindProperty("_root");
         }
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -86,6 +87,10 @@ namespace Aikom.AIEngine.Editor
                 serializedObject.ApplyModifiedProperties();
         }
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
+        /// <returns></returns>
         public override VisualElement CreateInspectorGUI()
         {
             var newRoot = new VisualElement();
@@ -101,6 +106,12 @@ namespace Aikom.AIEngine.Editor
             return newRoot;
         }
 
+        /// <summary>
+        /// Draws a simple line in GUI
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="thickness"></param>
+        /// <param name="padding"></param>
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
@@ -111,6 +122,11 @@ namespace Aikom.AIEngine.Editor
             EditorGUI.DrawRect(r, color);
         }
 
+        /// <summary>
+        /// Finds the script asset of this type. The filename of the type must match the type name exactly
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private MonoScript FindScriptAsset(Type type)
         {   
             var name = type.Name + ".cs";
@@ -122,5 +138,4 @@ namespace Aikom.AIEngine.Editor
             return null;
         }
     }
-
 }

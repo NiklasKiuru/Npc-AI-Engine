@@ -13,8 +13,9 @@ namespace Aikom.AIEngine
         {
         }
 
-        public override bool IsValid()
-        {
+        public override bool IsValid(out string message)
+        {   
+            message = "No parent assigned";
             return Parent != null;
         }
     }

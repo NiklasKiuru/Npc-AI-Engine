@@ -1,10 +1,14 @@
 #undef LOG_STATES
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Aikom.AIEngine
 {
+    /// <summary>
+    /// Base class of all behaviour nodes
+    /// </summary>
     [Serializable]
     public abstract class NodeBase : INode
     {
@@ -15,12 +19,27 @@ namespace Aikom.AIEngine
         private BehaviourTree _ctx;
         private NodeStatus _status;
 
-        public event Action<INode, NodeStatus> OnTick;
-        public event Action<INode> OnInitialize;
+        private event Action<INode, NodeStatus> OnTick;
+        private event Action<INode> OnInitialize;
 
+        /// <summary>
+        /// Parent of this node
+        /// </summary>
         public IParent Parent { get { return _parent; } }
+
+        /// <summary>
+        /// The tree this node is part of
+        /// </summary>
         public BehaviourTree Context { get { return _ctx; } }
+
+        /// <summary>
+        /// Unique id of this node in the context it was created in
+        /// </summary>
         public int Id { get { return _id; } }
+
+        /// <summary>
+        /// Description data of this node
+        /// </summary>
         public NodeDescriptor Descriptor 
         { 
             get => _desc; 
@@ -29,6 +48,10 @@ namespace Aikom.AIEngine
                 _desc = value;
             } 
         }
+
+        /// <summary>
+        /// Relative position of this node to other nodes in the tree
+        /// </summary>
         public Position Position 
         { 
             get 
@@ -43,12 +66,21 @@ namespace Aikom.AIEngine
             } 
         }
 
+        /// <summary>
+        /// Base constructor for a new node
+        /// </summary>
+        /// <param name="id"></param>
         public NodeBase(int id)
         {
             _id = id;
             _position = new Position() { outputIds = new() };
         }
 
+        /// <summary>
+        /// Constructor for cloning the node
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="position"></param>
         protected NodeBase(int id, Position position)
         {
             _id = id;
@@ -87,18 +119,21 @@ namespace Aikom.AIEngine
             return false;
         }
 
-        public void SetComment(string comment) 
-        { 
-            var desc = _desc;
-            desc.UserComment = comment;
-            _desc = desc;
-        } 
+        /// <summary>
+        /// Saves the window position in editor
+        /// </summary>
+        /// <param name="position"></param>
         public void SetWindowPosition(Rect position) 
         {
             var desc = _desc;
             desc.Position = position;
             _desc = desc;
         }
+
+        /// <summary>
+        /// Sets a custom name for this node
+        /// </summary>
+        /// <param name="name"></param>
         public void SetName(string name) 
         { 
             var desc = _desc;
@@ -106,11 +141,11 @@ namespace Aikom.AIEngine
             _desc = desc;
         }
 
-
-        protected abstract void OnInit();
-        protected abstract NodeStatus Tick();
-        public abstract bool IsValid();
-
+        /// <summary>
+        /// Downwards propagating process call
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.Exception"></exception>
         public NodeStatus Process()
         {
 #if LOG_STATES
@@ -143,6 +178,10 @@ namespace Aikom.AIEngine
             return _status;
         }
 
+        /// <summary>
+        /// Sets the parent of this node
+        /// </summary>
+        /// <param name="node"></param>
         public void SetParent(IParent node)
         {
             _parent = node;
@@ -154,8 +193,10 @@ namespace Aikom.AIEngine
             _position = pos;
         }
 
-        protected abstract void OnBuild();
-
+        /// <summary>
+        /// Builds connections, callbacks and sets context
+        /// </summary>
+        /// <param name="t"></param>
         void INode.Build(BehaviourTree t)
         {
             _ctx = t;
@@ -178,10 +219,45 @@ namespace Aikom.AIEngine
             OnBuild();
         }
 
-        public abstract INode Clone();
-        
-    }
+        /// <summary>
+        /// Duplicates this node with new context id and voids position data
+        /// </summary>
+        /// <returns></returns>
+        public NodeBase Duplicate(IReadOnlyCollection<NodeBase> context)
+        {
+            var copy = Clone() as NodeBase;
+            copy._id = ContextId.GenerateSimple(context, this);
+            copy._position = new Position() { outputIds = new() };
+            return copy;
+        }
 
-    
+        /// <summary>
+        /// Called every time before Tick if this node was not cached or ticked in this process cycle
+        /// </summary>
+        protected abstract void OnInit();
+
+        /// <summary>
+        /// Defines the status of this node. Called every time on downward process propagation
+        /// </summary>
+        /// <returns></returns>
+        protected abstract NodeStatus Tick();
+
+        /// <summary>
+        /// Called only once after the tree has built itself
+        /// </summary>
+        protected abstract void OnBuild();
+
+        /// <summary>
+        /// Defines if the node is valid to be processed. Called after all build logic has been completed
+        /// </summary>
+        /// <returns></returns>
+        public abstract bool IsValid(out string message);
+
+        /// <summary>
+        /// Clones this node. The implimentation should call an instance constructor with both Id and Position to retain relevant connection information
+        /// </summary>
+        /// <returns></returns>
+        public abstract INode Clone();
+    }
 }
 

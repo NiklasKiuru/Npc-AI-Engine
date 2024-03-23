@@ -40,8 +40,9 @@ namespace Aikom.AIEngine
             IsCached = false;
         }
 
-        public override bool IsValid()
+        public override bool IsValid(out string message)
         {
+            message = "Decorator must have atleast one valid child";
             return Child != null;
         }
     }

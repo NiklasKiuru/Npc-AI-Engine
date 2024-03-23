@@ -50,7 +50,6 @@ MonoBehaviour:
       type: {class: Root, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: Root node of the tree
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -69,8 +68,6 @@ MonoBehaviour:
       type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: Executes children from left to right until either one fails
-            or all succeed
           _maxChildren: -1
           _minChildren: 2
           _userComment: 
@@ -89,7 +86,6 @@ MonoBehaviour:
       type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: Finds object references from scene hierarchy
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -108,7 +104,6 @@ MonoBehaviour:
       type: {class: FindPathNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -135,7 +130,6 @@ MonoBehaviour:
       type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -157,7 +151,6 @@ MonoBehaviour:
       type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: Finds object references from scene hierarchy
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -176,7 +169,6 @@ MonoBehaviour:
       type: {class: CheckDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -195,7 +187,6 @@ MonoBehaviour:
       type: {class: SeekNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -226,7 +217,6 @@ MonoBehaviour:
       type: {class: Selector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: -1
           _minChildren: 2
           _userComment: 
@@ -245,7 +235,6 @@ MonoBehaviour:
       type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: -1
           _minChildren: 2
           _userComment: 
@@ -264,7 +253,6 @@ MonoBehaviour:
       type: {class: FindPathNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -291,7 +279,6 @@ MonoBehaviour:
       type: {class: SetDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -313,7 +300,6 @@ MonoBehaviour:
       type: {class: RepeatUntilSucces, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -332,7 +318,6 @@ MonoBehaviour:
       type: {class: CheckDestination, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -351,7 +336,6 @@ MonoBehaviour:
       type: {class: VoidNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: End point node with no action. Always returns succes
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -370,8 +354,6 @@ MonoBehaviour:
       type: {class: DelayNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: Delayes the execution of its child by defined time limit
-            in seconds
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -391,7 +373,6 @@ MonoBehaviour:
       type: {class: VoidNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: End point node with no action. Always returns succes
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -410,7 +391,6 @@ MonoBehaviour:
       type: {class: RandomSelector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: -1
           _minChildren: 2
           _userComment: 
@@ -429,7 +409,6 @@ MonoBehaviour:
       type: {class: Sequence, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: -1
           _minChildren: 2
           _userComment: 
@@ -448,7 +427,6 @@ MonoBehaviour:
       type: {class: PopFromStack, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -473,7 +451,6 @@ MonoBehaviour:
       type: {class: EqualsNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -498,7 +475,6 @@ MonoBehaviour:
       type: {class: Inverter, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 1
           _minChildren: 1
           _userComment: 
@@ -517,7 +493,6 @@ MonoBehaviour:
       type: {class: EqualsNode, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: 0
           _minChildren: 0
           _userComment: 
@@ -542,7 +517,6 @@ MonoBehaviour:
       type: {class: Selector, ns: Aikom.AIEngine, asm: Aikom.AIEngine}
       data:
         _desc:
-          _description: 
           _maxChildren: -1
           _minChildren: 2
           _userComment: 

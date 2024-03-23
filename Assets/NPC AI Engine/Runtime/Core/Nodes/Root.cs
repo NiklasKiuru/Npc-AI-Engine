@@ -55,8 +55,9 @@ namespace Aikom.AIEngine
         {
         }
 
-        public override bool IsValid()
+        public override bool IsValid(out string message)
         {
+            message = "Root does not contain a valid child to process";
             return _child != null;
         }
 
